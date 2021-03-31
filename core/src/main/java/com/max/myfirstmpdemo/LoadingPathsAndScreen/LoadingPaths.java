@@ -1,0 +1,17 @@
+package com.max.myfirstmpdemo.LoadingPathsAndScreen;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class LoadingPaths {
+
+    public LoadingPaths() {
+    }
+
+    public List<String> getSkinPaths(){
+        List<String> list = new ArrayList<>();
+        list.add(SkinPaths.SKIN_1_CLEANCRISPY);
+        list.add(SkinPaths.Skin_2_SGX);
+        return list;
+    }
+}
