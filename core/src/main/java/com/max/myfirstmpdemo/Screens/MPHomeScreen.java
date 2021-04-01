@@ -22,6 +22,7 @@ MyFirstMpDemoMain game;
 GameAssets gameAssets;
 public Stage stage;
 public  Skin skin;
+public ImageTextButton joinGameButtom;
 
     public MPHomeScreen(MyFirstMpDemoMain game) {
         this.game = game;
@@ -35,22 +36,23 @@ public  Skin skin;
         Gdx.input.setInputProcessor(this.stage);
         skin = gameAssets.getSgx();
 
-        ImageTextButton joinGameButtom = new ImageTextButton("Join Game!!!", skin);
+       joinGameButtom = new ImageTextButton("Join Game!!!", skin);
         joinGameButtom.setPosition(250 - joinGameButtom.getWidth()/2, 225);
         stage.addActor(joinGameButtom);
 
-        joinGameButtom.addListener(new ClickListener(){
-
+        ClickListener clicky = new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 RoomPacket roomPacket = new RoomPacket(RoomEnum.QUE);
                 //roomPacket.roomEnum = RoomEnum.QUE; //<-- redundant but works
+                if (game.clientWS.webSocket.isOpen())//{ joinGameButtom.removeListener(joinGameButtom.getClickListener());}
+                joinGameButtom.setDisabled(true);
                 game.clientWS.webSocket.send(roomPacket);
                 System.out.println("packet sent to server to add you to que...");
-
                 super.clicked(event, x, y);
             }
-        });
+        };
+        joinGameButtom.addListener(clicky);
 
     }
     public static String string = new String("hello \nthis is The Multiplayer Home/Lobby Screen");
@@ -73,7 +75,7 @@ public  Skin skin;
     }
     @Override
     public void resize(int width, int height) {
-
+        stage.getViewport().update(width, height);
     }
 
     @Override

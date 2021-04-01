@@ -38,6 +38,7 @@ dependencies {
 	implementation "com.github.MrStahlfelge.gdx-websockets:html:$websocketVersion:sources"
 	implementation "com.github.tommyettinger:jbump:$jbumpVersion:sources"
 
+
 }
 
 import org.akhikhl.gretty.AppBeforeIntegrationTestTask

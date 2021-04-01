@@ -10,10 +10,9 @@ public class CountDownPacket implements Transferable<CountDownPacket> {
     private float time; //must be inti in the constructor... not sure why
 
     public CountDownPacket(float time) {
-       this.time = time;
-       //dont do this.tim = somenumber.0f in my case 300
-    } //testing here because incoming packets always 300.0f ... yea fixed it. dont set this.tim = 300; it will always be 300 no matter what
-
+        this.time = time;
+        //dont do this.time = somenumber.0f in my case 300.0f testing here because incoming packets always 300.0f ... yea fixed it. dont set this.time = 300; in constructor it will always be 300 no matter what
+    }
     public CountDownPacket() {
     }
 

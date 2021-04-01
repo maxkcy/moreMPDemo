@@ -67,6 +67,7 @@ public class MyFirstMpDemoMain extends Game {
 		}catch (Exception exception){
 			System.out.println(exception);
 		}
+		super.dispose();
 	}
 
 	public SpriteBatch getBatch() {

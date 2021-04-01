@@ -107,8 +107,15 @@ public class ClientWS {
         webSocketHandler.registerHandler(RoomPacket.class, new WebSocketHandler.Handler<RoomPacket>() {
             @Override
             public boolean handle(final WebSocket webSocket, final RoomPacket packet) {
+                if(packet.roomEnum == RoomEnum.QUE){
                 System.out.println("message from server: Request received. Added to que");
                 MPHomeScreen.string = "Waiting in server's queue to join next game";
+                }else if(packet.roomEnum == RoomEnum.MPHOMELOBBY){
+                    System.out.println("message from server: Sent back to MPHomeScreen/Lobby");
+                    MPHomeScreen.string = ("hello \nthis is The Multiplayer Home/Lobby Screen");
+                    game.mpHomeScreen.joinGameButtom.setDisabled(false);
+                }
+
                 return true;
             }
         });

@@ -93,6 +93,7 @@ public class ServerMain extends Game {
             }
         });
         httpServer.listen(8778);
+
         System.out.println("Server is listening for new connections...");
     }
 }

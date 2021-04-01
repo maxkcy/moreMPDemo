@@ -4,6 +4,8 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.max.myfirstmpdemo.Packets.CountDownPacket;
+import com.max.myfirstmpdemo.Packets.RoomEnum;
+import com.max.myfirstmpdemo.Packets.RoomPacket;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.ServerWebSocket;
@@ -17,7 +19,7 @@ public class GameRoom extends ScreenAdapter {
     //public CountDownPacket countDownPacket = new CountDownPacket(300.0f);
     //for testies and this is demo im going to create a pool to keep pooling fresh in my memory
     Pool<CountDownPacket> countDownPacketPool;// = new Pool<CountDownPacket>() {
-
+    Pool<RoomPacket> roomPacketPool;
 
     public GameRoom(ServerMain serverMain) {
     this.serverMain = serverMain;
@@ -28,7 +30,7 @@ public class GameRoom extends ScreenAdapter {
     @Override
     public void show() {
       playersList = new Array<>();
-      time = 300.0f;
+      time = 60.0f;
       isActive = true;
       countDownPacketPool = new Pool<CountDownPacket>() {
           @Override
@@ -41,6 +43,13 @@ public class GameRoom extends ScreenAdapter {
           protected void reset(CountDownPacket object) {
               super.reset(object);
               object.setTime(time);
+          }
+      };
+
+      roomPacketPool = new Pool<RoomPacket>() {
+          @Override
+          protected RoomPacket newObject() {
+              return new RoomPacket();
           }
       };
       //System.out.println("The GameRoom has players: " + playersList);
@@ -68,6 +77,14 @@ public class GameRoom extends ScreenAdapter {
             if(isActive == true) {
                 System.out.println("Game Room has ended");
                 isActive = false;
+                for (ServerWebSocket serverWebSocket:
+                        playersList) {
+                    RoomPacket roomPacket = roomPacketPool.obtain();
+                    roomPacket.roomEnum = RoomEnum.MPHOMELOBBY;
+                    serverWebSocket.writeFinalBinaryFrame(Buffer.buffer(serverMain.manualSerializer.serialize(roomPacket)));
+                    roomPacketPool.free(roomPacket);
+                }
+
             }
         }
 
