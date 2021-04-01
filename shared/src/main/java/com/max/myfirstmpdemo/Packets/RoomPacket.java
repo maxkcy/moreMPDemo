@@ -15,6 +15,9 @@ public static final RoomEnum[] roomEnumArrayValues = RoomEnum.values();
     this.roomEnum = roomEnum;
     }
 
+    public RoomPacket() {
+    }
+
 
     @Override
     public void serialize(Serializer serializer) throws SerializationException {

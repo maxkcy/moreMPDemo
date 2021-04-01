@@ -44,15 +44,16 @@ public  Skin skin;
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 RoomPacket roomPacket = new RoomPacket(RoomEnum.QUE);
-                //roomPacket.roomEnum = RoomEnum.QUE; <-- redundant
+                //roomPacket.roomEnum = RoomEnum.QUE; //<-- redundant but works
                 game.clientWS.webSocket.send(roomPacket);
                 System.out.println("packet sent to server to add you to que...");
+
                 super.clicked(event, x, y);
             }
         });
 
     }
-    String string = new String("hello \nthis is The Multiplayer Home/Lobby Screen");
+    public static String string = new String("hello \nthis is The Multiplayer Home/Lobby Screen");
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(.75f, .5f, .5f, 1);

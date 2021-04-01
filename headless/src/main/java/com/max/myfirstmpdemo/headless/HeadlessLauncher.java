@@ -18,7 +18,7 @@ public class HeadlessLauncher {
 
 	private static HeadlessApplicationConfiguration getDefaultConfiguration() {
 		HeadlessApplicationConfiguration configuration = new HeadlessApplicationConfiguration();
-		configuration.renderInterval = 1/30f; // When this value is negative, MyFirstMpDemoMain#render() is never called.
+		configuration.renderInterval = 1/3f; // When this value is negative, MyFirstMpDemoMain#render() is never called.
 		return configuration;
 	}
 }
