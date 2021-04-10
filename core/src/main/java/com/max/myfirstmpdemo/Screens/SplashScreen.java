@@ -21,7 +21,7 @@ public class SplashScreen implements Screen {
     public SplashScreen() {
     }
     private Stage stage;
-    private GameAssets gameAssets;
+    public GameAssets gameAssets;
     Skin skin;
     MyFirstMpDemoMain game;
     ProgressBar progressBar;
@@ -78,6 +78,7 @@ public class SplashScreen implements Screen {
         if(game.getAssetManager().isFinished() && progressBar.getValue() == progressBar.getMaxValue() && value > 1.1f){
             game.loginScreen = new LoginScreen(game);
             game.mpHomeScreen = new MPHomeScreen(game);
+            game.roomScreen = new RoomScreen(game);
             Gdx.app.postRunnable(()-> game.setScreen(game.loginScreen));;
         }
         //value += 5;

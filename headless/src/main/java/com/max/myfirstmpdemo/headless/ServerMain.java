@@ -4,10 +4,11 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Queue;
-import com.github.czyzby.websocket.WebSocket;
 import com.github.czyzby.websocket.serialization.impl.ManualSerializer;
 import com.max.myfirstmpdemo.PacketsSerializer;
 
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -37,6 +38,7 @@ public class ServerMain extends Game {
         this.launch();
     }
 
+
     @Override
     public void render() {
         super.render();
@@ -65,6 +67,13 @@ public class ServerMain extends Game {
 
     }
 
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        httpServer.close();
+    }
+    boolean handled = false;
     private void launch(){
         httpServer = vertx.createHttpServer();
         System.out.println("Launching Server...");
@@ -86,14 +95,32 @@ public class ServerMain extends Game {
                     @Override
                     public void handle(Void event) {
                         System.out.println("client disconnected (WS handler)"+ client.textHandlerID());
+                        handled = false;
+                        waitingForGameQueue.forEach(serverWebSocket -> {
+                            if(serverWebSocket == client){
+                                waitingForGameQueue.removeValue(client, true);
+                                System.out.println(client + "removed from queue");
+                                handled = true;
+                            }
+                        });
+                        if(handled == false){
+                            for (GameRoom gameRoom : gameRoomArray) {
+                                if (gameRoom.playersList.contains(client, true)) {
+                                gameRoom.playersList.removeValue(client, true);
+                                break;
+                                }
+                            }
+                        }
+                        handled = true;
                         clientWSList.removeValue(client, true);
                     }
                 });
+
 
             }
         });
         httpServer.listen(8778);
 
-        System.out.println("Server is listening for new connections...");
+        System.out.println("Server Started\n listening for new connections...");
     }
 }

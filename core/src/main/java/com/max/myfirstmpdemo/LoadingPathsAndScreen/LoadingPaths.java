@@ -14,4 +14,10 @@ public class LoadingPaths {
         list.add(SkinPaths.Skin_2_SGX);
         return list;
     }
+
+    public List<String> getSpritePaths(){
+        List<String> list = new ArrayList<>();
+        list.add(SpritePaths.FOOTBALL_PITCH_BACKGROUND);
+        return list;
+    }
 }

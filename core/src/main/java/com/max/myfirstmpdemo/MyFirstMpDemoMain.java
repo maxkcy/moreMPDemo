@@ -3,6 +3,7 @@ package com.max.myfirstmpdemo;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -14,6 +15,7 @@ import com.max.myfirstmpdemo.ClientWS.ClientWS;
 import com.max.myfirstmpdemo.LoadingPathsAndScreen.Loader;
 import com.max.myfirstmpdemo.Screens.LoginScreen;
 import com.max.myfirstmpdemo.Screens.MPHomeScreen;
+import com.max.myfirstmpdemo.Screens.RoomScreen;
 import com.max.myfirstmpdemo.Screens.SplashScreen;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
@@ -26,7 +28,7 @@ public class MyFirstMpDemoMain extends Game {
 	public ClientWS clientWS;
 	public LoginScreen loginScreen;
 	public MPHomeScreen mpHomeScreen;
-
+	public RoomScreen roomScreen;
 
 
 	public MyFirstMpDemoMain(SpriteBatch batch, AssetManager assetManager) {
@@ -47,26 +49,36 @@ public class MyFirstMpDemoMain extends Game {
 		clientWS = new ClientWS(this);
 
 		Gdx.app.postRunnable(()-> setScreen(splashScreen));
-
+		Gdx.input.setCatchKey(Input.Keys.SPACE, true);//disables gwt, android keys for scrolling
 
 	}
 
 	@Override
 	public void render() {
-
+		Gdx.gl.glClearColor(.8f, 1, .9f, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		if(Gdx.input.isKeyJustPressed(Input.Keys.F)){
+			Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode()); //works across all screens because this render is called before all screens aka super.render() which calls render from next screen
+		}
 		super.render();
 	}
 
 	@Override
 	public void dispose() {
+		System.out.println("dispose called");
 		batch.dispose();
 		assetManager.dispose();
 		WebSockets.closeGracefully(clientWS.webSocket);
 		try{clientWS.webSocket.close();
-			super.dispose();
+			System.out.println("Yay it works");
 		}catch (Exception exception){
 			System.out.println(exception);
+			System.out.println("NOY it doesnt work :(");
 		}
+		splashScreen.dispose();
+		loginScreen.dispose();
+		mpHomeScreen.dispose();
+		//clientWS.dispose();
 		super.dispose();
 	}
 

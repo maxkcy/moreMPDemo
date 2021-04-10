@@ -15,12 +15,14 @@ import com.max.myfirstmpdemo.Packets.RoomEnum;
 import com.max.myfirstmpdemo.Packets.RoomPacket;
 import com.max.myfirstmpdemo.PacketsSerializer;
 import com.max.myfirstmpdemo.Screens.MPHomeScreen;
+import com.max.myfirstmpdemo.Screens.RoomScreen;
 
 public class ClientWS {
 
    public WebSocket webSocket;
    public ManualSerializer serializer;
    private MyFirstMpDemoMain game;
+   float count;
 
    public ClientWS(MyFirstMpDemoMain game) {
        this.game = game;
@@ -98,7 +100,10 @@ public class ClientWS {
             @Override
             public boolean handle(final WebSocket webSocket, final CountDownPacket packet) {
                 System.out.println("message from server: Countdown Packet" + "Time is: " + packet.getTime());
-                MPHomeScreen.string = ("im lazy to make a new screen for game,\nbut you are in it now," +
+                if(game.getScreen() != game.roomScreen){
+                    Gdx.app.postRunnable(()-> game.setScreen(game.roomScreen)); // really bad way of handling because you dont want to check every time, just send a different packet to switch to screen, then . but this is demo
+                }
+                RoomScreen.message = ("im not too lazy to make a new screen for game,\n you are in it now," +
                         "\n and here is the countdown time: " + packet.getTime());
                 return true;
             }
@@ -111,9 +116,12 @@ public class ClientWS {
                 System.out.println("message from server: Request received. Added to que");
                 MPHomeScreen.string = "Waiting in server's queue to join next game";
                 }else if(packet.roomEnum == RoomEnum.MPHOMELOBBY){
+                    count++;
                     System.out.println("message from server: Sent back to MPHomeScreen/Lobby");
-                    MPHomeScreen.string = ("hello \nthis is The Multiplayer Home/Lobby Screen");
+                    Gdx.app.postRunnable(()-> game.setScreen(game.mpHomeScreen));
+                    MPHomeScreen.string = ("Hello! This is The Multiplayer Home/Lobby Screen\nnumber of times played this session: " + count);
                     game.mpHomeScreen.joinGameButtom.setDisabled(false);
+
                 }
 
                 return true;
@@ -121,5 +129,9 @@ public class ClientWS {
         });
 
    return webSocketHandler;
+   }
+
+   public void dispose(){
+       webSocket.close();
    }
 }

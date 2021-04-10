@@ -19,7 +19,7 @@ import com.max.myfirstmpdemo.Packets.RoomPacket;
 public class MPHomeScreen extends ScreenAdapter {
 BitmapFont font;
 MyFirstMpDemoMain game;
-GameAssets gameAssets;
+public GameAssets gameAssets;
 public Stage stage;
 public  Skin skin;
 public ImageTextButton joinGameButtom;
@@ -67,7 +67,7 @@ public ImageTextButton joinGameButtom;
 
             if(Gdx.input.isKeyPressed(Input.Keys.ENTER)){
                 font.setColor(.75f,.75f,.5f,.75f);
-                string = "in que";
+                string = "you pressed the enter key  :) ... \n this is a testing demo";
 
             }
         stage.draw();
