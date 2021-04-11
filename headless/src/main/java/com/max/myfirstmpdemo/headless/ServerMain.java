@@ -2,12 +2,17 @@ package com.max.myfirstmpdemo.headless;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.GdxBuild;
+import com.badlogic.gdx.utils.GdxNativesLoader;
 import com.badlogic.gdx.utils.Queue;
 import com.github.czyzby.websocket.serialization.impl.ManualSerializer;
 import com.max.myfirstmpdemo.PacketsSerializer;
 
 
+import java.io.Console;
+import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.vertx.core.Handler;
@@ -24,7 +29,7 @@ public class ServerMain extends Game {
     public Queue<ServerWebSocket> waitingForGameQueue;// = new Queue<>();
     public HandleFrame handleFrame;// = new HandleFrame(this);
     public Array<GameRoom> gameRoomArray;// = new Array<>();
-
+    public Scanner scanner;
 
     @Override
     public void create() {
@@ -36,12 +41,13 @@ public class ServerMain extends Game {
         handleFrame = new HandleFrame(this);
         gameRoomArray = new Array<>();
         this.launch();
+        scanner = new Scanner(System.in);
     }
 
 
     @Override
     public void render() {
-        super.render();
+
         if(waitingForGameQueue.size == 2){
             GameRoom gameRoom = new GameRoom(this);
             gameRoom.show();
@@ -64,7 +70,7 @@ public class ServerMain extends Game {
                 gameRoom = null;
             }
         }
-
+        super.render();
     }
 
 

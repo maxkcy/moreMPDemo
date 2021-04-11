@@ -73,7 +73,7 @@ public class GameRoom extends ScreenAdapter {
         //System.out.println(time);
         }
 
-        if (time <= 0.0f){
+        if (time <= 0.0f || playersList.isEmpty()){
             if(isActive == true) {
                 System.out.println("Game Room has ended");
                 isActive = false;

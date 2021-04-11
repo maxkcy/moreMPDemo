@@ -45,11 +45,12 @@ public ImageTextButton joinGameButtom;
             public void clicked(InputEvent event, float x, float y) {
                 RoomPacket roomPacket = new RoomPacket(RoomEnum.QUE);
                 //roomPacket.roomEnum = RoomEnum.QUE; //<-- redundant but works
-                if (game.clientWS.webSocket.isOpen())//{ joinGameButtom.removeListener(joinGameButtom.getClickListener());}
-                joinGameButtom.setDisabled(true);
-                game.clientWS.webSocket.send(roomPacket);
-                System.out.println("packet sent to server to add you to que...");
-                super.clicked(event, x, y);
+                if (game.clientWS.webSocket.isOpen() && joinGameButtom.isDisabled() == false) { //{joinGameButtom.removeListener(joinGameButtom.getClickListener());}
+                    joinGameButtom.setDisabled(true);
+                    game.clientWS.webSocket.send(roomPacket);
+                    System.out.println("packet sent to server to add you to que...");
+                    super.clicked(event, x, y);
+                }
             }
         };
         joinGameButtom.addListener(clicky);
