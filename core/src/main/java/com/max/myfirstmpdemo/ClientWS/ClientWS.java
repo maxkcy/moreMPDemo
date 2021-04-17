@@ -16,6 +16,9 @@ import com.max.myfirstmpdemo.Packets.RoomPacket;
 import com.max.myfirstmpdemo.PacketsSerializer;
 import com.max.myfirstmpdemo.Screens.MPHomeScreen;
 import com.max.myfirstmpdemo.Screens.RoomScreen;
+import com.max.myfirstmpdemo.Tools;
+
+import java.net.InetAddress;
 
 public class ClientWS {
 
@@ -29,7 +32,12 @@ public class ClientWS {
     }
 
     public void init(){
-        webSocket = WebSockets.newSocket(WebSockets.toWebSocketUrl("localhost", 8778));
+       //String wss;
+       //wss = WebSockets.toSecureWebSocketUrl("maxkcyfun.fun", 443);
+        webSocket = WebSockets.newSocket(WebSockets.toSecureWebSocketUrl("maxkcyfun.fun", 443) + "/myws");
+
+  
+        System.out.println(webSocket.isSecure());
         //inorder for the initialization error to go away call
         // ...it's important CommonWebSockets.initiate(); in the launcher.
         serializer = new ManualSerializer();
@@ -96,15 +104,14 @@ public class ClientWS {
             }
         };
         webSocketHandler.registerHandler(CountDownPacket.class, new WebSocketHandler.Handler<CountDownPacket>() {
-
             @Override
             public boolean handle(final WebSocket webSocket, final CountDownPacket packet) {
                 System.out.println("message from server: Countdown Packet" + "Time is: " + packet.getTime());
                 if(game.getScreen() != game.roomScreen){
                     Gdx.app.postRunnable(()-> game.setScreen(game.roomScreen)); // really bad way of handling because you dont want to check every time, just send a different packet to switch to screen, then . but this is demo
                 }
-                RoomScreen.message = ("im not too lazy to make a new screen for game,\n you are in it now," +
-                        "\n and here is the countdown time: " + packet.getTime());
+                RoomScreen.message = ("im not too lazy to make a new screen for game,\nyou are in it now," +
+                        "\nand here is the countdown time: " + packet.getTime());
                 return true;
             }
         });

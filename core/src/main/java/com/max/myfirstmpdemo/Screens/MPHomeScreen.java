@@ -32,7 +32,7 @@ public ImageTextButton joinGameButtom;
     @Override
     public void show() {
         font = gameAssets.getSgx().getFont("font");
-        this.stage = new Stage(new FitViewport(500,500));
+        stage = new Stage(new FitViewport(500,500));
         Gdx.input.setInputProcessor(this.stage);
         skin = gameAssets.getSgx();
 
@@ -82,6 +82,6 @@ public ImageTextButton joinGameButtom;
     @Override
     public void dispose() {
     stage.dispose();
-        font.dispose();
+    font.dispose();
     }
 }

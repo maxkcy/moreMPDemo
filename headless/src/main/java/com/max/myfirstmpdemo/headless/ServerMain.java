@@ -9,15 +9,18 @@ import com.badlogic.gdx.utils.GdxNativesLoader;
 import com.badlogic.gdx.utils.Queue;
 import com.github.czyzby.websocket.serialization.impl.ManualSerializer;
 import com.max.myfirstmpdemo.PacketsSerializer;
+import com.max.myfirstmpdemo.Tools;
 
 
 import java.io.Console;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.http.WebSocketFrame;
 
@@ -25,6 +28,7 @@ public class ServerMain extends Game {
     public Vertx vertx;
     public ManualSerializer manualSerializer;
     public HttpServer httpServer;
+    public HttpServerOptions httpServerOptions;
     public Array<ServerWebSocket> clientWSList; // = new Array<>();
     public Queue<ServerWebSocket> waitingForGameQueue;// = new Queue<>();
     public HandleFrame handleFrame;// = new HandleFrame(this);
@@ -81,7 +85,9 @@ public class ServerMain extends Game {
     }
     boolean handled = false;
     private void launch(){
-        httpServer = vertx.createHttpServer();
+        httpServerOptions = new HttpServerOptions();
+        httpServerOptions.setEnabledSecureTransportProtocols(httpServerOptions.getEnabledSecureTransportProtocols());
+        httpServer = vertx.createHttpServer(httpServerOptions);
         System.out.println("Launching Server...");
 
         httpServer.webSocketHandler(new Handler<ServerWebSocket>(){
@@ -125,7 +131,7 @@ public class ServerMain extends Game {
 
             }
         });
-        httpServer.listen(8778);
+        httpServer.listen(Tools.PORT);
 
         System.out.println("Server Started\n listening for new connections...");
     }

@@ -60,6 +60,9 @@ public class MyFirstMpDemoMain extends Game {
 		if(Gdx.input.isKeyJustPressed(Input.Keys.F)){
 			Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode()); //works across all screens because this render is called before all screens aka super.render() which calls render from next screen
 		}
+		/*if(Gdx.input.isKeyPressed(Input.Keys.N)){
+			Gdx.graphics.setWindowedMode(Gdx.graphics.)
+		}*/ //needs work on later because of full screen bug, unable to press escape, and display on tv monitor gets stuck
 		super.render();
 	}
 
