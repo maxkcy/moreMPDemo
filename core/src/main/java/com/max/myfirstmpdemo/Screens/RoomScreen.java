@@ -6,23 +6,27 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ArrayMap;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.max.myfirstmpdemo.GameAssetsAndStuff.GameAssets;
+import com.max.myfirstmpdemo.GameAssetsAndStuff.RedPlayer;
 import com.max.myfirstmpdemo.MyFirstMpDemoMain;
 
 public class RoomScreen extends ScreenAdapter {
 MyFirstMpDemoMain game;
-SplashScreen splashScreen;
 OrthographicCamera cam;
 FitViewport viewport;
 public BitmapFont font;
 public Sprite footBallPitchBackround;
 public static String message;
 public GameAssets gameAssets;
+public ArrayMap<String, RedPlayer> redPlayers;
 
     public RoomScreen(MyFirstMpDemoMain game) {
         this.game = game;
         gameAssets = new GameAssets(game);
+        redPlayers = new ArrayMap<>();
     }
 
     @Override
@@ -50,6 +54,10 @@ public GameAssets gameAssets;
         footBallPitchBackround.draw(game.getBatch());
         font.draw(game.getBatch(), message, 85, 80);
         game.getBatch().end();
+
+        for (RedPlayer redPlayer: redPlayers.values) {
+            redPlayer.update(delta);
+        }
 
     }
 

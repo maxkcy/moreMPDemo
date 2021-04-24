@@ -20,4 +20,10 @@ public class LoadingPaths {
         list.add(SpritePaths.FOOTBALL_PITCH_BACKGROUND);
         return list;
     }
+
+    public List<String> getAnimationAtlasPaths(){
+        List<String> list = new ArrayList<>();
+        list.add(AnimationAtlasPaths.PLAYERS_ATLAS);
+        return list;
+    }
 }

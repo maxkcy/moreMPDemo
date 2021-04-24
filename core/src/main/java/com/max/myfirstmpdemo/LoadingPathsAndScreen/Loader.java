@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.max.myfirstmpdemo.GameAssetsAndStuff.GameAssets;
 import com.max.myfirstmpdemo.MyFirstMpDemoMain;
@@ -17,6 +18,7 @@ public class Loader {
         loadingPaths = new LoadingPaths();
         loadSkinPaths();
         loadSpritePaths();
+        loadAtlasPaths();
         //this.game.getAssetManager().finishLoading();
     }
 
@@ -40,5 +42,15 @@ public class Loader {
                 }
             }
         }
-    }
+
+        public void loadAtlasPaths(){
+            for (String atlasPath : loadingPaths.getAnimationAtlasPaths()){
+                if (atlasPath != null){
+                    game.getAssetManager().load(atlasPath, TextureAtlas.class);
+                }
+            }
+        }
+
+}
+
 

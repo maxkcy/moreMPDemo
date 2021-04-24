@@ -2,20 +2,13 @@ package com.max.myfirstmpdemo.headless;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.GdxBuild;
-import com.badlogic.gdx.utils.GdxNativesLoader;
+import com.badlogic.gdx.utils.ArrayMap;
 import com.badlogic.gdx.utils.Queue;
 import com.github.czyzby.websocket.serialization.impl.ManualSerializer;
 import com.max.myfirstmpdemo.PacketsSerializer;
 import com.max.myfirstmpdemo.Tools;
 
-
-import java.io.Console;
-import java.util.Scanner;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -26,14 +19,14 @@ import io.vertx.core.http.WebSocketFrame;
 
 public class ServerMain extends Game {
     public Vertx vertx;
-    public ManualSerializer manualSerializer;
+    public static ManualSerializer manualSerializer;
     public HttpServer httpServer;
     public HttpServerOptions httpServerOptions;
     public Array<ServerWebSocket> clientWSList; // = new Array<>();
     public Queue<ServerWebSocket> waitingForGameQueue;// = new Queue<>();
     public HandleFrame handleFrame;// = new HandleFrame(this);
     public Array<GameRoom> gameRoomArray;// = new Array<>();
-    public Scanner scanner;
+    public static ArrayMap<ServerWebSocket, ClientID> clientHash;
 
     @Override
     public void create() {
@@ -44,21 +37,30 @@ public class ServerMain extends Game {
         waitingForGameQueue = new Queue<>();
         handleFrame = new HandleFrame(this);
         gameRoomArray = new Array<>();
+        clientHash = new ArrayMap<>();
         this.launch();
-        scanner = new Scanner(System.in);
+
+
     }
 
 
     @Override
     public void render() {
 
-        if(waitingForGameQueue.size == 2){
+        if(waitingForGameQueue.size >= 2){ //
             GameRoom gameRoom = new GameRoom(this);
             gameRoom.show();
-            for (ServerWebSocket serverWebSocket:
+            /*for (ServerWebSocket serverWebSocket:
                  waitingForGameQueue) {
                 gameRoom.playersList.add(serverWebSocket);
+            }*/ //defunct old code
+            int i = 0;
+            for (int playersToBeAdded = 2; i < playersToBeAdded; i++){
+            gameRoom.playersList.add(waitingForGameQueue.first());
+            clientHash.get(waitingForGameQueue.first()).setClientGameRoom(gameRoom);
+            waitingForGameQueue.removeFirst();
             }
+
             System.out.println("The GameRoom has players: " + gameRoom.playersList);
             gameRoomArray.add(gameRoom);
             waitingForGameQueue.clear();
@@ -95,6 +97,8 @@ public class ServerMain extends Game {
             public void handle(ServerWebSocket client) {
                 System.out.println("connection from (WS handler)"+ client.textHandlerID());
                 clientWSList.add(client);
+                clientHash.put(client, new ClientID(client));
+
 
                 client.frameHandler(new Handler<WebSocketFrame>(){
                     @Override
@@ -118,12 +122,14 @@ public class ServerMain extends Game {
                         if(handled == false){
                             for (GameRoom gameRoom : gameRoomArray) {
                                 if (gameRoom.playersList.contains(client, true)) {
-                                gameRoom.playersList.removeValue(client, true);
+                                    ServerMain.clientHash.get(client).setClientPlayerItem(null);
+                                    gameRoom.playersList.removeValue(client, true);
                                 break;
                                 }
                             }
                         }
                         handled = true;
+                        clientHash.removeKey(client);
                         clientWSList.removeValue(client, true);
                     }
                 });
@@ -133,6 +139,7 @@ public class ServerMain extends Game {
         });
         httpServer.listen(Tools.PORT);
 
-        System.out.println("Server Started\n listening for new connections...");
+        System.out.println("Server Started \n" +
+                "listening for new connections...");
     }
 }

@@ -32,10 +32,16 @@ public class ClientWS {
     }
 
     public void init(){
-       //String wss;
-       //wss = WebSockets.toSecureWebSocketUrl("maxkcyfun.fun", 443);
-        webSocket = WebSockets.newSocket(WebSockets.toSecureWebSocketUrl("maxkcyfun.fun", 443) + "/myws");
-
+       String wss;
+        wss = WebSockets.toSecureWebSocketUrl("maxkcyfun.fun", 443);
+        System.out.println(wss);
+        //webSocket = WebSockets.newSocket(WebSockets.toSecureWebSocketUrl("maxkcyfun.fun", 443) + "/myws");
+        //webSocket = WebSockets.newSocket(WebSockets.toSecureWebSocketUrl("maxkcyfun.fun", 443) + "myws");
+        //webSocket = WebSockets.newSocket("https://54.215.94.22:8778");
+        //webSocket = WebSockets.newSocket(WebSockets.toWebSocketUrl("54.215.94.22", 8778));
+        //lets see if browser error: "this endpoint must be available over WSS." gets fixed ..not working
+        webSocket = WebSockets.newSocket(WebSockets.toWebSocketUrl("localhost", 8778));
+        //webSocket = WebSockets.newSocket(WebSockets.toSecureWebSocketUrl("localhost", Tools.PORT));
   
         System.out.println(webSocket.isSecure());
         //inorder for the initialization error to go away call
@@ -44,9 +50,9 @@ public class ClientWS {
         PacketsSerializer.register(serializer);
         webSocket.setSerializer(serializer);
         webSocket.setSendGracefully(true);
-
-
         webSocket.addListener(getListener());
+        GameScreenListener gameScreenListener = new GameScreenListener(game);
+        webSocket.addListener(gameScreenListener.getListener());
         webSocket.connect();
 
     }
@@ -108,6 +114,7 @@ public class ClientWS {
             public boolean handle(final WebSocket webSocket, final CountDownPacket packet) {
                 System.out.println("message from server: Countdown Packet" + "Time is: " + packet.getTime());
                 if(game.getScreen() != game.roomScreen){
+
                     Gdx.app.postRunnable(()-> game.setScreen(game.roomScreen)); // really bad way of handling because you dont want to check every time, just send a different packet to switch to screen, then . but this is demo
                 }
                 RoomScreen.message = ("im not too lazy to make a new screen for game,\nyou are in it now," +
@@ -127,6 +134,7 @@ public class ClientWS {
                     System.out.println("message from server: Sent back to MPHomeScreen/Lobby");
                     Gdx.app.postRunnable(()-> game.setScreen(game.mpHomeScreen));
                     MPHomeScreen.string = ("Hello! This is The Multiplayer Home/Lobby Screen\nnumber of times played this session: " + count);
+                    game.roomScreen.redPlayers.clear();
                     game.mpHomeScreen.joinGameButtom.setDisabled(false);
 
                 }

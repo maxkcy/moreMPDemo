@@ -14,8 +14,11 @@ dependencies {
 
 	api "com.github.tommyettinger:jbump:$jbumpVersion"
 	api 'io.vertx:vertx-core:4.0.2'
+	api project(':shared')
 
 }
+
+//TEt told me to add this to build jar. command: java -jar serverfile
 jar {
 	archiveBaseName.set(appName)
 	dependsOn configurations.runtimeClasspath

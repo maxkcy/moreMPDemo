@@ -15,6 +15,7 @@ public class GameRoom extends ScreenAdapter {
     public Array<ServerWebSocket> playersList;
     public float time;// = 300.0f;
     public boolean isActive;// = true;
+    public GameWorld gameWorld;
 
     //public CountDownPacket countDownPacket = new CountDownPacket(300.0f);
     //for testies and this is demo im going to create a pool to keep pooling fresh in my memory
@@ -32,12 +33,12 @@ public class GameRoom extends ScreenAdapter {
       playersList = new Array<>();
       time = 60.0f;
       isActive = true;
+      gameWorld = new GameWorld(playersList);
       countDownPacketPool = new Pool<CountDownPacket>() {
           @Override
           protected CountDownPacket newObject() {
               return new CountDownPacket();
           }
-
 
           @Override
           protected void reset(CountDownPacket object) {
@@ -87,8 +88,8 @@ public class GameRoom extends ScreenAdapter {
 
             }
         }
-
         time = time - delta;
+        gameWorld.update();
 
     }
 
@@ -96,5 +97,7 @@ public class GameRoom extends ScreenAdapter {
     @Override
     public void dispose() {
         super.dispose();
+        countDownPacketPool.clear();
+        roomPacketPool.clear();
     }
 }
