@@ -9,7 +9,7 @@ import io.vertx.core.http.ServerWebSocket;
 
 public class PlayerEntity extends Entity{
     public PlayerEntity(float x, float y) {
-        super(x, y, 40, 100);
+        super(x, y, 24, 24);
     }
 
     public enum States{
@@ -18,6 +18,9 @@ public class PlayerEntity extends Entity{
         Idle;
     }
     public States state;
+    public boolean idleStateSent = false;
+    public boolean runningStateSent = false;
+    public boolean kickingStateSent = false;
 
     CollisionFilter collisionFilter = new CollisionFilter() {
         @Override
@@ -27,7 +30,7 @@ public class PlayerEntity extends Entity{
         }
     };
 
-    public Vector2 startPos;
+    public Vector2 startPos = new Vector2();
 
     public ServerWebSocket playerSocket;
 }

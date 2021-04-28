@@ -9,6 +9,7 @@ import com.github.czyzby.websocket.WebSockets;
 import com.github.czyzby.websocket.data.WebSocketCloseCode;
 import com.github.czyzby.websocket.data.WebSocketException;
 import com.github.czyzby.websocket.serialization.impl.ManualSerializer;
+import com.max.myfirstmpdemo.GameAssetsAndStuff.RedPlayer;
 import com.max.myfirstmpdemo.MyFirstMpDemoMain;
 import com.max.myfirstmpdemo.Packets.CountDownPacket;
 import com.max.myfirstmpdemo.Packets.RoomEnum;
@@ -82,7 +83,7 @@ public class ClientWS {
             public boolean onOpen(WebSocket webSocket) {
                 System.out.println("Websocket connection opened");
                 Gdx.app.postRunnable(()-> game.setScreen(game.mpHomeScreen));
-                //game.setScreen(game.mpHomeScreen); <-dont use this
+                //game.setScreen(game.mpHomeScreen); <-don't use this
                 return FULLY_HANDLED;
             }
 

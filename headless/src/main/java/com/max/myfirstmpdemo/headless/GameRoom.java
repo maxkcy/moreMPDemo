@@ -24,16 +24,17 @@ public class GameRoom extends ScreenAdapter {
 
     public GameRoom(ServerMain serverMain) {
     this.serverMain = serverMain;
+    playersList = new Array<>();
     System.out.println("New GameRoom initiated");
     }
 
 
     @Override
     public void show() {
-      playersList = new Array<>();
+
       time = 60.0f;
       isActive = true;
-      gameWorld = new GameWorld(playersList);
+
       countDownPacketPool = new Pool<CountDownPacket>() {
           @Override
           protected CountDownPacket newObject() {
@@ -54,12 +55,15 @@ public class GameRoom extends ScreenAdapter {
           }
       };
       //System.out.println("The GameRoom has players: " + playersList);
+        gameWorld = new GameWorld(playersList);
+        gameWorld.initGameWorld();
     }
 
     @Override
     public void render(float delta) {
         //super.render(delta);
         if(isActive){
+            gameWorld.update();
         for (ServerWebSocket serverWebSocket:
              playersList) {
             CountDownPacket countDownPacket = countDownPacketPool.obtain();
@@ -89,7 +93,7 @@ public class GameRoom extends ScreenAdapter {
             }
         }
         time = time - delta;
-        gameWorld.update();
+
 
     }
 

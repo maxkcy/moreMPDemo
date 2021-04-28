@@ -15,18 +15,18 @@ public class BlueShirtInitPacket implements Transferable<BlueShirtInitPacket> {
         this.IDKey = IDKey;
     }
 
+
     public void setIDKey(String IDKey) {
         this.IDKey = IDKey;
     }
 
-
     @Override
     public void serialize(Serializer serializer) throws SerializationException {
-
+        serializer.serializeString(IDKey);
     }
 
     @Override
     public BlueShirtInitPacket deserialize(Deserializer deserializer) throws SerializationException {
-        return null;
+        return new BlueShirtInitPacket(deserializer.deserializeString());
     }
 }

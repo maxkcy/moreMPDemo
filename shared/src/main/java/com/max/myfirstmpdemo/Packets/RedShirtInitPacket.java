@@ -5,6 +5,7 @@ import com.github.czyzby.websocket.serialization.Transferable;
 import com.github.czyzby.websocket.serialization.impl.Deserializer;
 import com.github.czyzby.websocket.serialization.impl.Serializer;
 
+
 public class RedShirtInitPacket implements Transferable<RedShirtInitPacket> {
 
     public String IDKey;

@@ -18,7 +18,7 @@ ServerMain serverMain;
         System.out.println("Received packet: " + request + " from: RA " + webSocket.remoteAddress());
 
         if (request instanceof RoomPacket){
-            System.out.println(((RoomPacket) request).roomEnum);
+            System.out.println("RoomPact RoomEnum: " + ((RoomPacket) request).roomEnum);
             if(((RoomPacket) request).roomEnum == RoomEnum.QUE){
                 serverMain.waitingForGameQueue.addLast(webSocket);
                 System.out.println("client " + webSocket + " added to que");

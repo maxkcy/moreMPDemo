@@ -4,8 +4,8 @@ package com.max.myfirstmpdemo;
 import com.github.czyzby.websocket.serialization.impl.ManualSerializer;
 import com.max.myfirstmpdemo.Packets.BlueShirtInitPacket;
 import com.max.myfirstmpdemo.Packets.CountDownPacket;
+import com.max.myfirstmpdemo.Packets.RedPlayerStatePacket;
 import com.max.myfirstmpdemo.Packets.RedShirtInitPacket;
-import com.max.myfirstmpdemo.Packets.RoomEnum;
 import com.max.myfirstmpdemo.Packets.RoomPacket;
 
 public class PacketsSerializer {
@@ -18,5 +18,6 @@ public class PacketsSerializer {
         serializer.register(new CountDownPacket());
         serializer.register(new RedShirtInitPacket());
         serializer.register(new BlueShirtInitPacket());
+        serializer.register(new RedPlayerStatePacket());
     }
 }

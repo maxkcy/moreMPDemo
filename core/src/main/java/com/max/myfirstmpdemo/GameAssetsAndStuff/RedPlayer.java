@@ -12,9 +12,9 @@ import com.max.myfirstmpdemo.MyFirstMpDemoMain;
 
 public class RedPlayer {
     MyFirstMpDemoMain game;
-    Animation<TextureRegion> redIdleAnimation;
-    Animation<TextureRegion> redRunningAnimation;
-    Animation<TextureRegion> redKickingAnimation;
+    public Animation<TextureRegion> redIdleAnimation;
+    public Animation<TextureRegion> redRunningAnimation;
+    public Animation<TextureRegion> redKickingAnimation;
     TextureAtlas textureAtlas;
 
     public Animation<TextureRegion> getAnimation() {
@@ -40,20 +40,23 @@ public class RedPlayer {
 
     public Sprite keyframe = new Sprite(redIdleAnimation.getKeyFrames()[0]);
 
-    public Vector2 position;
+    public Vector2 position = new Vector2();
 
-    public void setPosition(Vector2 position) {
-        this.position = position;
+    public void setPosition(float x, float y) {
+        position.x = x;
+        position.y = y;
     }
 
     float statetime = 0f;
     public void resetStatetime() {
         statetime = 0f;
     }
+
     public void update(float delta){
-        keyframe = (Sprite)animation.getKeyFrame(statetime);
+        System.out.print(animation);
+        keyframe.setRegion(animation.getKeyFrame(delta));
         this.statetime += delta;
-        //keyframe.setPosition();
+        keyframe.setPosition(position.x, position.y);
         keyframe.draw(game.getBatch());
     }
 

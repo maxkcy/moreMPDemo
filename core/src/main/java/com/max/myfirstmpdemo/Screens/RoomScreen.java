@@ -53,12 +53,11 @@ public ArrayMap<String, RedPlayer> redPlayers;
         game.getBatch().begin();
         footBallPitchBackround.draw(game.getBatch());
         font.draw(game.getBatch(), message, 85, 80);
-        game.getBatch().end();
 
-        for (RedPlayer redPlayer: redPlayers.values) {
+        for (RedPlayer redPlayer: redPlayers.values()) {
             redPlayer.update(delta);
         }
-
+        game.getBatch().end();
     }
 
     @Override
@@ -72,5 +71,6 @@ public ArrayMap<String, RedPlayer> redPlayers;
     @Override
     public void dispose() {
         super.dispose();
+        redPlayers.clear();
     }
 }

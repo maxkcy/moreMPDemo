@@ -55,8 +55,8 @@ public class MyFirstMpDemoMain extends Game {
 
 	@Override
 	public void render() {
-		Gdx.gl.glClearColor(.8f, 1, .9f, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		//Gdx.gl.glClearColor(.8f, 1, .9f, 1);
+		//Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		if(Gdx.input.isKeyJustPressed(Input.Keys.F)){
 			Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode()); //works across all screens because this render is called before all screens aka super.render() which calls render from next screen
 		}

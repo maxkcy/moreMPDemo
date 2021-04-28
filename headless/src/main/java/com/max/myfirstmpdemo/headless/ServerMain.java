@@ -49,7 +49,7 @@ public class ServerMain extends Game {
 
         if(waitingForGameQueue.size >= 2){ //
             GameRoom gameRoom = new GameRoom(this);
-            gameRoom.show();
+
             /*for (ServerWebSocket serverWebSocket:
                  waitingForGameQueue) {
                 gameRoom.playersList.add(serverWebSocket);
@@ -58,12 +58,13 @@ public class ServerMain extends Game {
             for (int playersToBeAdded = 2; i < playersToBeAdded; i++){
             gameRoom.playersList.add(waitingForGameQueue.first());
             clientHash.get(waitingForGameQueue.first()).setClientGameRoom(gameRoom);
+            Gdx.app.log(this.toString(), waitingForGameQueue.first() + " added to gameRoom.playersList");
             waitingForGameQueue.removeFirst();
             }
-
             System.out.println("The GameRoom has players: " + gameRoom.playersList);
             gameRoomArray.add(gameRoom);
             waitingForGameQueue.clear();
+            gameRoom.show();
         }
 
         for(GameRoom gameRoom : gameRoomArray){

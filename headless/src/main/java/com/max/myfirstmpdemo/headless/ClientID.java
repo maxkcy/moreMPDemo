@@ -12,6 +12,7 @@ public class ClientID {
     private Item<Entity> clientPlayerItem;
     private ServerWebSocket client;
 
+
     public ClientID(ServerWebSocket client) {
         this.client = client;
         playerID = client.toString();
@@ -20,6 +21,14 @@ public class ClientID {
    public enum Team{
         RED,
         BLUE;
+    }
+
+    public void setTeam(Team team) {
+        this.team = team;
+    }
+
+    public Team getTeam() {
+        return team;
     }
 
     public Team team;
