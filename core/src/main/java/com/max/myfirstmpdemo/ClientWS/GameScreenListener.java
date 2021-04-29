@@ -84,34 +84,36 @@ public class GameScreenListener {
         webSocketHandler.registerHandler(RedPlayerStatePacket.class, new WebSocketHandler.Handler<RedPlayerStatePacket>() {
             @Override
             public boolean handle(final WebSocket webSocket, final RedPlayerStatePacket redPlayerStatePacket) {
+
                 Gdx.app.log(this.toString(), "RedPlayerStatePacket Handle START\n packet from: " + redPlayerStatePacket.getClientId());
-                Gdx.app.log(this.toString(), "PlayerStatePacket from " + redPlayerStatePacket.getClientId() + " is being handled\n" +
-                        "redPlayerStatePacket.State: " + redPlayerStatePacket.getState());
+                Gdx.app.log(this.toString(), "PlayerStatePacket from " + redPlayerStatePacket.getClientId() + " \nis being handled." +
+                        " redPlayerStatePacket.State: " + redPlayerStatePacket.getState());
 
                 if(game.roomScreen.redPlayers.containsKey(redPlayerStatePacket.getClientId())){
-                switch (redPlayerStatePacket.getState()){
-                    case idle:
+                    Gdx.app.log(this.toString(), "redPlayerStatePacket.client has matched w/ a RedPlayer in redPlayers Array");
+                    switch (redPlayerStatePacket.getState()){
+                    case idle:{
                         if(game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation != game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).redIdleAnimation){
-                            game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation = game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).redIdleAnimation;}
+                            game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).setAnimation(RedPlayer.redIdleAnimation);}
                             Gdx.app.log(this.toString(), "animation  set to idle animation " + game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation);
-                        break;
-                    case running:
+                        break;}
+                    case running:{
                         if(game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation != game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).redRunningAnimation){
                         game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation = game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).redRunningAnimation;}
                         Gdx.app.log(this.toString(), "animation  set to running animation " + game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation);
-                        break;
-                    case kicking:
+                        break;}
+                    case kicking:{
                         if(game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation != game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).redKickingAnimation){
                         game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation = game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).redKickingAnimation;}
                         Gdx.app.log(this.toString(), "animation  set to kicking animation " + game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation);
+                        break;}
 
-                        default:
-                            Gdx.app.log(this.toString(), " no state given ???" + redPlayerStatePacket.getState());
-                        break;
+                        default: {Gdx.app.log(this.toString(), " no state given ??? state null" + redPlayerStatePacket.getState());
+                            break;}
                 }
                     game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).setPosition(redPlayerStatePacket.x, redPlayerStatePacket.y);
 
-            }else {Gdx.app.log(this.toString(), "Keys in game.roomScreen.redPlayers.keys" + game.roomScreen.redPlayers.keys.toString());}
+            }else {Gdx.app.log(this.toString(), "redPlayerStatePacket does not match a keys in game.roomScreen.redPlayers.keys " + game.roomScreen.redPlayers.keys.toString());}
 
                 Gdx.app.log(this.toString(), "RedPlayerStatePacket Handle END");
                 return true;
@@ -121,9 +123,11 @@ public class GameScreenListener {
         webSocketHandler.registerHandler(BlueShirtInitPacket.class, new WebSocketHandler.Handler<BlueShirtInitPacket>() {
             @Override
             public boolean handle(WebSocket webSocket, BlueShirtInitPacket blueShirtInitPacket) {
+                Gdx.app.log(this.toString(), "BlueShirtInitPacket handle START");
                 Gdx.app.log(this.toString(), "blueShirtInitPacket handled ...\n" +
                         "printing out a line of blah because blueShirtInitPacket handling will be implemented after\n" +
-                        "redpackets are at least drawn");
+                        "redpackets are at least drawn... handling... handled.");
+                Gdx.app.log(this.toString(), "BlueShirtIntiPacket handle END");
                 return true;
             }
         });

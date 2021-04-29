@@ -33,16 +33,12 @@ public class ClientWS {
     }
 
     public void init(){
-       String wss;
-        wss = WebSockets.toSecureWebSocketUrl("maxkcyfun.fun", 443);
-        System.out.println(wss);
-        //webSocket = WebSockets.newSocket(WebSockets.toSecureWebSocketUrl("maxkcyfun.fun", 443) + "/myws");
-        //webSocket = WebSockets.newSocket(WebSockets.toSecureWebSocketUrl("maxkcyfun.fun", 443) + "myws");
-        //webSocket = WebSockets.newSocket("https://54.215.94.22:8778");
-        //webSocket = WebSockets.newSocket(WebSockets.toWebSocketUrl("54.215.94.22", 8778));
-        //lets see if browser error: "this endpoint must be available over WSS." gets fixed ..not working
+        //String wss;
+        //wss = WebSockets.toSecureWebSocketUrl("maxkcyfun.fun", 443);
+        //System.out.println(wss);
+
         webSocket = WebSockets.newSocket(WebSockets.toWebSocketUrl("localhost", 8778));
-        //webSocket = WebSockets.newSocket(WebSockets.toSecureWebSocketUrl("localhost", Tools.PORT));
+
   
         System.out.println(webSocket.isSecure());
         //inorder for the initialization error to go away call

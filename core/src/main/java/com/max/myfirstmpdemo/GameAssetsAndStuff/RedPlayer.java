@@ -1,6 +1,7 @@
 package com.max.myfirstmpdemo.GameAssetsAndStuff;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -12,9 +13,13 @@ import com.max.myfirstmpdemo.MyFirstMpDemoMain;
 
 public class RedPlayer {
     MyFirstMpDemoMain game;
-    public Animation<TextureRegion> redIdleAnimation;
-    public Animation<TextureRegion> redRunningAnimation;
-    public Animation<TextureRegion> redKickingAnimation;
+    public Sprite keyframe;
+    public static Animation<TextureRegion> redIdleAnimation;
+    public static Animation<TextureRegion> redRunningAnimation;
+    public static Animation<TextureRegion> redKickingAnimation;
+    public Animation<TextureRegion> animation;
+    public Animation<TextureRegion> lastAnimation;
+ //   public Texture keyframeinit = new Texture(Gdx.files.internal("badlogic.png"));
 
 
     public Animation<TextureRegion> getAnimation() {
@@ -25,20 +30,23 @@ public class RedPlayer {
         this.animation = animation;
     }
 
-    public Animation<TextureRegion> animation;
-    public Animation<TextureRegion> lastAnimation;
+
     public RedPlayer(MyFirstMpDemoMain game) {
         this.game = game;
+
+        keyframe = new Sprite(game.splashScreen.gameAssets.textureAtlas.createSprites().get(0));
+
         redIdleAnimation = new Animation<TextureRegion>(1/15f, game.splashScreen.gameAssets.textureAtlas.findRegions("RedIdle"));
         redRunningAnimation = new Animation<TextureRegion>(1/15f, game.splashScreen.gameAssets.textureAtlas.findRegions("RedRun"));
         redKickingAnimation = new Animation<TextureRegion>(1/15f, game.splashScreen.gameAssets.textureAtlas.findRegions("RedKick"));
+
     }
 
     public void setKeyframe(Sprite keyframe) {
         this.keyframe = keyframe;
     }
 
-    public Sprite keyframe;
+
 
     public Vector2 position = new Vector2();
 

@@ -30,7 +30,8 @@ public class GameWorld {
     Item<Entity> ballItem;
     Pool<RedShirtInitPacket> redShirtInitPacketPool;
     Pool<BlueShirtInitPacket> blueShirtInitPacketPool;
-    RedPlayerStatePacket redPlayerStatePacket;
+    Pool<RedPlayerStatePacket> redPlayerStatePacketPool;
+    //RedPlayerStatePacket redPlayerStatePacket;
 
     public void initGameWorld() {
 
@@ -55,10 +56,17 @@ public class GameWorld {
             }
         };
 
+        redPlayerStatePacketPool = new Pool<RedPlayerStatePacket>() {
+            @Override
+            protected RedPlayerStatePacket newObject() {
+                return new RedPlayerStatePacket();
+            }
+        };
+
         intiTeamRed();
         initTeamBlue();
 
-        redPlayerStatePacket = new RedPlayerStatePacket();
+        //redPlayerStatePacket = new RedPlayerStatePacket();
         //send packet, client will assign ARRAYLIST.
         //^nope this is wrong... this whole page is wrong. redo it
     }
@@ -85,46 +93,9 @@ public class GameWorld {
             }
 
         }
-        for (Item<Entity> playerItem : playerItemListTeamRed) {
-            redPlayerStatePacket.setClientId(ServerMain.clientHash.get(((PlayerEntity) playerItem.userData).playerSocket).playerID);
 
-            if (playerItem.userData.position.x!= world.getRect(playerItem).x || playerItem.userData.position.y != world.getRect(playerItem).y
-            && ((PlayerEntity)playerItem.userData).state != PlayerEntity.States.Kicking){
-                ((PlayerEntity)playerItem.userData).state = PlayerEntity.States.Running;
+        redPlayerStatePacketMethod();
 
-                redPlayerStatePacket.setState(RedPlayerStatePacket.States.running);
-                redPlayerStatePacket.setPosition(world.getRect(playerItem).x, world.getRect(playerItem).y);
-
-                for (ServerWebSocket player : playersList) {
-                    //send player position packet Running
-                        player.writeFinalBinaryFrame(
-                                Buffer.buffer(ServerMain.manualSerializer.serialize(redPlayerStatePacket)));
-                        Gdx.app.log(String.valueOf(this), "RedPlayerStatePacked running sent to " + player + " " + redPlayerStatePacket.x + " " + redPlayerStatePacket.y);
-                    }
-
-                ((PlayerEntity)playerItem.userData).idleStateSent = false;
-                ((PlayerEntity)playerItem.userData).kickingStateSent = false;
-                playerItem.userData.position.x = world.getRect(playerItem).x;
-                playerItem.userData.position.y = world.getRect(playerItem).y;
-                } else {
-                    if (!((PlayerEntity) playerItem.userData).idleStateSent){
-                    ((PlayerEntity) playerItem.userData).state = PlayerEntity.States.Idle;
-                    //send packet idleState
-                    redPlayerStatePacket.setState(RedPlayerStatePacket.States.idle);
-                    redPlayerStatePacket.setPosition(world.getRect(playerItem).x, world.getRect(playerItem).y);
-
-                        for (ServerWebSocket player : playersList) {
-                            //send player position packet Idle
-                            player.writeFinalBinaryFrame(
-                                    Buffer.buffer(ServerMain.manualSerializer.serialize(redPlayerStatePacket)));
-                            Gdx.app.log(this.toString(),"redplaystatepacket idle sent w/ positions " + redPlayerStatePacket.x + " " + redPlayerStatePacket.y +"\n " +
-                                    "sent to:" + player);
-                        }
-                    ((PlayerEntity)playerItem.userData).idleStateSent = true;
-
-                    }
-                }
-            }
         for (Item<Entity> playerItem : playerItemListTeamBlue) {
             if (playerItem.userData.position.x!= world.getRect(playerItem).x || playerItem.userData.position.y != world.getRect(playerItem).y
                     && ((PlayerEntity)playerItem.userData).state != PlayerEntity.States.Kicking){
@@ -201,6 +172,52 @@ public class GameWorld {
                 }
             }
         }
+
+    public void redPlayerStatePacketMethod(){
+        for (Item<Entity> playerItem : playerItemListTeamRed) {
+            RedPlayerStatePacket redPlayerStatePacket = redPlayerStatePacketPool.obtain();
+            redPlayerStatePacket.setClientId(ServerMain.clientHash.get(((PlayerEntity) playerItem.userData).playerSocket).playerID);
+
+            if (playerItem.userData.position.x!= world.getRect(playerItem).x || playerItem.userData.position.y != world.getRect(playerItem).y
+                    && ((PlayerEntity)playerItem.userData).state != PlayerEntity.States.Kicking){
+                ((PlayerEntity)playerItem.userData).state = PlayerEntity.States.Running;
+
+                redPlayerStatePacket.setState(RedPlayerStatePacket.States.running);
+                redPlayerStatePacket.setPosition(world.getRect(playerItem).x, world.getRect(playerItem).y);
+
+                for (ServerWebSocket player : playersList) {
+                    //send player position packet Running
+                    player.writeFinalBinaryFrame(
+                            Buffer.buffer(ServerMain.manualSerializer.serialize(redPlayerStatePacket)));
+                    Gdx.app.log(String.valueOf(this), "RedPlayerStatePacked running sent to " + player + " " + redPlayerStatePacket.x + " " + redPlayerStatePacket.y);
+                }
+
+                ((PlayerEntity)playerItem.userData).idleStateSent = false;
+                ((PlayerEntity)playerItem.userData).kickingStateSent = false;
+                playerItem.userData.position.x = world.getRect(playerItem).x;
+                playerItem.userData.position.y = world.getRect(playerItem).y;
+            } else {
+                if (!((PlayerEntity) playerItem.userData).idleStateSent){
+                    ((PlayerEntity) playerItem.userData).state = PlayerEntity.States.Idle;
+                    //send packet idleState
+                    redPlayerStatePacket.setState(RedPlayerStatePacket.States.idle);
+                    redPlayerStatePacket.setPosition(world.getRect(playerItem).x, world.getRect(playerItem).y);
+
+                    for (ServerWebSocket player : playersList) {
+                        //send player position packet Idle
+                        player.writeFinalBinaryFrame(
+                                Buffer.buffer(ServerMain.manualSerializer.serialize(redPlayerStatePacket)));
+                        Gdx.app.log(this.toString(),"redplaystatepacket idle (" + redPlayerStatePacket.getState() + ") sent w/ positions " + redPlayerStatePacket.x + " " + redPlayerStatePacket.y +"\n " +
+                                "sent to:" + player);
+                    }
+                    ((PlayerEntity)playerItem.userData).idleStateSent = true;
+
+                }
+            }
+            redPlayerStatePacketPool.free(redPlayerStatePacket);
+
+        }
+    }
 }
 
 

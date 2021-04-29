@@ -6,11 +6,18 @@ import com.github.czyzby.websocket.serialization.impl.Deserializer;
 import com.github.czyzby.websocket.serialization.impl.Serializer;
 
 public class RedPlayerStatePacket implements Transferable<RedPlayerStatePacket> {
+    public static final States[] statesEnumArray = States.values();
+    public float x;
+    public float y;
+    public String clientId;
 
+
+    States state;
     public RedPlayerStatePacket(States state,float x, float y, String clientId) {
-    this.x = x;
-    this.y = y;
-    this.clientId = clientId;
+        this.state = state;
+        this.x = x;
+        this.y = y;
+        this.clientId = clientId;
     }
 
     public RedPlayerStatePacket() {
@@ -25,12 +32,7 @@ public class RedPlayerStatePacket implements Transferable<RedPlayerStatePacket> 
         States() {
         }
     }
-    public static States[] statesEnumArray = States.values();
 
-    public float x;
-    public float y;
-
-    States state;
     public States getState() {
         return state;
     }
@@ -46,9 +48,6 @@ public class RedPlayerStatePacket implements Transferable<RedPlayerStatePacket> 
     public void setClientId(String clientId) {
         this.clientId = clientId;
     }
-
-    public String clientId;
-
 
 
     public void setPosition(float x, float y){
