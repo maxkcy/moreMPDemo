@@ -11,6 +11,8 @@ import com.max.myfirstmpdemo.Packets.BlueShirtInitPacket;
 import com.max.myfirstmpdemo.Packets.RedPlayerStatePacket;
 import com.max.myfirstmpdemo.Packets.RedShirtInitPacket;
 
+import static com.max.myfirstmpdemo.Packets.RedPlayerStatePacket.States.*;
+
 public class GameScreenListener {
     private MyFirstMpDemoMain game;
 
@@ -65,13 +67,16 @@ public class GameScreenListener {
         webSocketHandler.registerHandler(RedShirtInitPacket.class, new WebSocketHandler.Handler<RedShirtInitPacket>() {
             @Override
             public boolean handle(final WebSocket webSocket, final RedShirtInitPacket redShirtInitPacket) {
-                try{
-                if(game.roomScreen.redPlayers != null){
+
+                    Gdx.app.log(this.toString(), "RedShirtInitPacket Handle START");
+                    if(game.roomScreen.redPlayers != null){
                 game.roomScreen.redPlayers.put(redShirtInitPacket.IDKey, new RedPlayer(game));
-                    Gdx.app.log(this.toString(), "new player added to: game.roomScreen.redPlayers");}
+                    Gdx.app.log(this.toString(), "new player " + redShirtInitPacket.IDKey + " added to: game.roomScreen.redPlayers");}
                 else{
-                    Gdx.app.log(this.toString(), "game.roomScreen.redPlayers == null");}}
-                catch(Exception ex){Gdx.app.log(this.toString(), "some error thrown");}
+                    Gdx.app.log(this.toString(), "game.roomScreen.redPlayers == null");}
+
+
+                Gdx.app.log(this.toString(), "RedShirtInitPacket Handle END");
                 return true;
             }
         });
@@ -79,26 +84,36 @@ public class GameScreenListener {
         webSocketHandler.registerHandler(RedPlayerStatePacket.class, new WebSocketHandler.Handler<RedPlayerStatePacket>() {
             @Override
             public boolean handle(final WebSocket webSocket, final RedPlayerStatePacket redPlayerStatePacket) {
-                if(game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId())!= null){
-                    Gdx.app.log(this.toString(), "PlayerStatePacket handled");
+                Gdx.app.log(this.toString(), "RedPlayerStatePacket Handle START\n packet from: " + redPlayerStatePacket.getClientId());
+                Gdx.app.log(this.toString(), "PlayerStatePacket from " + redPlayerStatePacket.getClientId() + " is being handled\n" +
+                        "redPlayerStatePacket.State: " + redPlayerStatePacket.getState());
+
+                if(game.roomScreen.redPlayers.containsKey(redPlayerStatePacket.getClientId())){
                 switch (redPlayerStatePacket.getState()){
                     case idle:
                         if(game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation != game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).redIdleAnimation){
-                        game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation = game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).redIdleAnimation;}
-                    break;
+                            game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation = game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).redIdleAnimation;}
+                            Gdx.app.log(this.toString(), "animation  set to idle animation " + game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation);
+                        break;
                     case running:
                         if(game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation != game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).redRunningAnimation){
                         game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation = game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).redRunningAnimation;}
-                    break;
+                        Gdx.app.log(this.toString(), "animation  set to running animation " + game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation);
+                        break;
                     case kicking:
                         if(game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation != game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).redKickingAnimation){
                         game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation = game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).redKickingAnimation;}
-                    default:
+                        Gdx.app.log(this.toString(), "animation  set to kicking animation " + game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation);
+
+                        default:
+                            Gdx.app.log(this.toString(), " no state given ???" + redPlayerStatePacket.getState());
                         break;
                 }
                     game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).setPosition(redPlayerStatePacket.x, redPlayerStatePacket.y);
 
-            }
+            }else {Gdx.app.log(this.toString(), "Keys in game.roomScreen.redPlayers.keys" + game.roomScreen.redPlayers.keys.toString());}
+
+                Gdx.app.log(this.toString(), "RedPlayerStatePacket Handle END");
                 return true;
             }
         });
@@ -106,7 +121,9 @@ public class GameScreenListener {
         webSocketHandler.registerHandler(BlueShirtInitPacket.class, new WebSocketHandler.Handler<BlueShirtInitPacket>() {
             @Override
             public boolean handle(WebSocket webSocket, BlueShirtInitPacket blueShirtInitPacket) {
-                Gdx.app.log(this.toString(), "blueShirtInitPacket handled");
+                Gdx.app.log(this.toString(), "blueShirtInitPacket handled ...\n" +
+                        "printing out a line of blah because blueShirtInitPacket handling will be implemented after\n" +
+                        "redpackets are at least drawn");
                 return true;
             }
         });

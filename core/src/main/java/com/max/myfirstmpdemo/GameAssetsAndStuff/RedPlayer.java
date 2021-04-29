@@ -15,7 +15,7 @@ public class RedPlayer {
     public Animation<TextureRegion> redIdleAnimation;
     public Animation<TextureRegion> redRunningAnimation;
     public Animation<TextureRegion> redKickingAnimation;
-    TextureAtlas textureAtlas;
+
 
     public Animation<TextureRegion> getAnimation() {
         return animation;
@@ -26,19 +26,19 @@ public class RedPlayer {
     }
 
     public Animation<TextureRegion> animation;
+    public Animation<TextureRegion> lastAnimation;
     public RedPlayer(MyFirstMpDemoMain game) {
         this.game = game;
-        textureAtlas = game.getAssetManager().get(AnimationAtlasPaths.PLAYERS_ATLAS, TextureAtlas.class);
-        redIdleAnimation = new Animation<TextureRegion>(1/15f, textureAtlas.findRegions("RedIdle"));
-        redRunningAnimation = new Animation<TextureRegion>(1/15f, textureAtlas.findRegions("RedRun"));
-        redKickingAnimation = new Animation<TextureRegion>(1/15f, textureAtlas.findRegions("RedKick"));
+        redIdleAnimation = new Animation<TextureRegion>(1/15f, game.splashScreen.gameAssets.textureAtlas.findRegions("RedIdle"));
+        redRunningAnimation = new Animation<TextureRegion>(1/15f, game.splashScreen.gameAssets.textureAtlas.findRegions("RedRun"));
+        redKickingAnimation = new Animation<TextureRegion>(1/15f, game.splashScreen.gameAssets.textureAtlas.findRegions("RedKick"));
     }
 
     public void setKeyframe(Sprite keyframe) {
         this.keyframe = keyframe;
     }
 
-    public Sprite keyframe = new Sprite(redIdleAnimation.getKeyFrames()[0]);
+    public Sprite keyframe;
 
     public Vector2 position = new Vector2();
 
@@ -53,10 +53,13 @@ public class RedPlayer {
     }
 
     public void update(float delta){
-        System.out.print(animation);
-        keyframe.setRegion(animation.getKeyFrame(delta));
+        Gdx.app.log(this.toString(), String.valueOf(animation));
+        if(animation != null){
+            keyframe.setRegion(animation.getKeyFrame(delta));
+            keyframe.setPosition(position.x, position.y);
+        }else {Gdx.app.log(this.toString(), "animation is null");}
         this.statetime += delta;
-        keyframe.setPosition(position.x, position.y);
+
         keyframe.draw(game.getBatch());
     }
 

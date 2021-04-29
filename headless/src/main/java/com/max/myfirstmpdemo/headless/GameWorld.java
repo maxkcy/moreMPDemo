@@ -117,7 +117,8 @@ public class GameWorld {
                             //send player position packet Idle
                             player.writeFinalBinaryFrame(
                                     Buffer.buffer(ServerMain.manualSerializer.serialize(redPlayerStatePacket)));
-                            Gdx.app.log(this.toString(),"redplaystatepacket idle sent" + redPlayerStatePacket.x + " " + redPlayerStatePacket.y);
+                            Gdx.app.log(this.toString(),"redplaystatepacket idle sent w/ positions " + redPlayerStatePacket.x + " " + redPlayerStatePacket.y +"\n " +
+                                    "sent to:" + player);
                         }
                     ((PlayerEntity)playerItem.userData).idleStateSent = true;
 

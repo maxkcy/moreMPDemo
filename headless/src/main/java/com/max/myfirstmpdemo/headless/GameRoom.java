@@ -1,5 +1,6 @@
 package com.max.myfirstmpdemo.headless;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -69,12 +70,12 @@ public class GameRoom extends ScreenAdapter {
             CountDownPacket countDownPacket = countDownPacketPool.obtain();
             //CountDownPacket countDownPacket = new CountDownPacket();
             countDownPacket.setTime(time);
-            System.out.println(countDownPacket.getTime());
+            //System.out.println(countDownPacket.getTime());
             serverWebSocket.writeFinalBinaryFrame(Buffer.buffer(serverMain.manualSerializer.serialize(countDownPacket)));
-
+            Gdx.app.log(this.toString(), "CountDownPacket w/ time: " + countDownPacket.getTime() + " sent to: " + serverWebSocket);
             countDownPacketPool.free(countDownPacket);
             }
-        System.out.println("Countdown packets sent");
+        //System.out.println("Countdown packets sent");
         //System.out.println(time);
         }
 

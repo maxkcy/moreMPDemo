@@ -24,7 +24,7 @@ public class MyFirstMpDemoMain extends Game {
 
 	private SpriteBatch batch;
 	private AssetManager assetManager;
-	private SplashScreen splashScreen;
+	public SplashScreen splashScreen;
 	public ClientWS clientWS;
 	public LoginScreen loginScreen;
 	public MPHomeScreen mpHomeScreen;
