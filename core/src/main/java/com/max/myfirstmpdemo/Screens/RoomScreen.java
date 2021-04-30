@@ -55,7 +55,7 @@ public ArrayMap<String, RedPlayer> redPlayers;
         font.draw(game.getBatch(), message, 85, 80);
 
         for (RedPlayer redPlayer: redPlayers.values()) {
-            redPlayer.update(delta);
+            redPlayer.update(Gdx.graphics.getDeltaTime());
         }
         game.getBatch().end();
     }

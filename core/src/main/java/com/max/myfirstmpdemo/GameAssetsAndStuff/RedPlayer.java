@@ -40,6 +40,9 @@ public class RedPlayer {
         redRunningAnimation = new Animation<TextureRegion>(1/15f, game.splashScreen.gameAssets.textureAtlas.findRegions("RedRun"));
         redKickingAnimation = new Animation<TextureRegion>(1/15f, game.splashScreen.gameAssets.textureAtlas.findRegions("RedKick"));
 
+        redIdleAnimation.setPlayMode(Animation.PlayMode.LOOP);
+        redRunningAnimation.setPlayMode(Animation.PlayMode.LOOP);
+        redKickingAnimation.setPlayMode(Animation.PlayMode.LOOP);
     }
 
     public void setKeyframe(Sprite keyframe) {
@@ -63,7 +66,7 @@ public class RedPlayer {
     public void update(float delta){
         Gdx.app.log(this.toString(), String.valueOf(animation));
         if(animation != null){
-            keyframe.setRegion(animation.getKeyFrame(delta));
+            keyframe.setRegion(animation.getKeyFrame(statetime));
             keyframe.setPosition(position.x, position.y);
         }else {Gdx.app.log(this.toString(), "animation is null");}
         this.statetime += delta;

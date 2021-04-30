@@ -146,7 +146,7 @@ public class GameWorld {
             //ugh send an int packet called redshirts.
             for (ServerWebSocket client: playersList) {
                 RedShirtInitPacket redShirtInitPacket = redShirtInitPacketPool.obtain();
-                redShirtInitPacket.setIDKey(client.toString());
+                redShirtInitPacket.setIDKey(((PlayerEntity) playerItem.userData).playerSocket.toString());
                 client.writeFinalBinaryFrame((Buffer.buffer(ServerMain.manualSerializer.serialize(redShirtInitPacket))));
                 Gdx.app.log(this.toString(), "redShirtInitPacket Sent to: IDKey: " + client.toString());
                 redShirtInitPacketPool.free(redShirtInitPacket);
