@@ -36,9 +36,9 @@ public class RedPlayer {
 
         keyframe = new Sprite(game.splashScreen.gameAssets.textureAtlas.createSprites().get(0));
 
-        redIdleAnimation = new Animation<TextureRegion>(1/15f, game.splashScreen.gameAssets.textureAtlas.findRegions("RedIdle"));
-        redRunningAnimation = new Animation<TextureRegion>(1/15f, game.splashScreen.gameAssets.textureAtlas.findRegions("RedRun"));
-        redKickingAnimation = new Animation<TextureRegion>(1/15f, game.splashScreen.gameAssets.textureAtlas.findRegions("RedKick"));
+        redIdleAnimation = new Animation<TextureRegion>(1/10f, game.splashScreen.gameAssets.textureAtlas.findRegions("RedIdle"));
+        redRunningAnimation = new Animation<TextureRegion>(1/10f, game.splashScreen.gameAssets.textureAtlas.findRegions("RedRun"));
+        redKickingAnimation = new Animation<TextureRegion>(1/10f, game.splashScreen.gameAssets.textureAtlas.findRegions("RedKick"));
 
         redIdleAnimation.setPlayMode(Animation.PlayMode.LOOP);
         redRunningAnimation.setPlayMode(Animation.PlayMode.LOOP);

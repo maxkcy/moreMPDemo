@@ -5,8 +5,10 @@ import com.github.czyzby.websocket.WebSocket;
 import com.github.czyzby.websocket.WebSocketHandler;
 import com.github.czyzby.websocket.data.WebSocketCloseCode;
 import com.github.czyzby.websocket.data.WebSocketException;
+import com.max.myfirstmpdemo.GameAssetsAndStuff.BluePlayer;
 import com.max.myfirstmpdemo.GameAssetsAndStuff.RedPlayer;
 import com.max.myfirstmpdemo.MyFirstMpDemoMain;
+import com.max.myfirstmpdemo.Packets.BluePlayerStatePacket;
 import com.max.myfirstmpdemo.Packets.BlueShirtInitPacket;
 import com.max.myfirstmpdemo.Packets.RedPlayerStatePacket;
 import com.max.myfirstmpdemo.Packets.RedShirtInitPacket;
@@ -133,17 +135,77 @@ public class GameScreenListener {
         });
 
         webSocketHandler.registerHandler(BlueShirtInitPacket.class, new WebSocketHandler.Handler<BlueShirtInitPacket>() {
+
             @Override
-            public boolean handle(WebSocket webSocket, BlueShirtInitPacket blueShirtInitPacket) {
-                Gdx.app.log(this.toString(), "BlueShirtInitPacket handle START");
-                Gdx.app.log(this.toString(), "blueShirtInitPacket handled ...\n" +
-                        "printing out a line of blah because blueShirtInitPacket handling will be implemented after\n" +
-                        "redpackets are at least drawn... handling... handled.");
-                Gdx.app.log(this.toString(), "BlueShirtIntiPacket handle END");
+            public boolean handle(final WebSocket webSocket, final BlueShirtInitPacket blueShirtInitPacket) {
+                Gdx.app.log(this.toString(), "BlueShirtInitPacket Handle START");
+                if(game.roomScreen.bluePlayers != null){
+                    game.roomScreen.bluePlayers.put(blueShirtInitPacket.IDKey, new BluePlayer(game));
+                    Gdx.app.log(this.toString(), "new player " + blueShirtInitPacket.IDKey + " added to: game.roomScreen.BluePlayers");}
+                else{
+                    Gdx.app.log(this.toString(), "game.roomScreen.bluePlayers == null");}
+
+
+                Gdx.app.log(this.toString(), "BlueShirtInitPacket Handle END");
                 return true;
             }
         });
 
+        webSocketHandler.registerHandler(BluePlayerStatePacket.class, new WebSocketHandler.Handler<BluePlayerStatePacket>() {
+
+            @Override
+            public boolean handle(final WebSocket webSocket, final BluePlayerStatePacket bluePlayerStatePacket) {
+
+                Gdx.app.log(this.toString(), "RedPlayerStatePacket Handle START\n packet from: " + bluePlayerStatePacket.getClientId());
+                Gdx.app.log(this.toString(), "PlayerStatePacket from " + bluePlayerStatePacket.getClientId() + " \nis being handled." +
+                        " bluePlayerStatePacket.State: " + bluePlayerStatePacket.getState());
+
+                if(game.roomScreen.bluePlayers.containsKey(bluePlayerStatePacket.getClientId())){
+                    Gdx.app.log(this.toString(), "bluePlayerStatePacket.ClientId has matched w/ a BluePlayer in bluePlayers Array");
+                    try {
+                        switch (bluePlayerStatePacket.getState()) {
+                            case idle: {
+                                if (game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).animation != game.roomScreen.redPlayers.get(bluePlayerStatePacket.getClientId()).redIdleAnimation) {
+                                    game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).setAnimation(BluePlayer.blueIdleAnimation);
+                                }
+                                Gdx.app.log(this.toString(), "animation  set to idle animation " + game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).animation);
+                                break;
+                            }
+                            case running: {
+                                if (game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).animation != game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).blueRunningAnimation) {
+                                    game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).animation = game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).blueRunningAnimation;
+                                }
+                                Gdx.app.log(this.toString(), "animation  set to running animation " + game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).animation);
+                                break;
+                            }
+                            case kicking: {
+                                if (game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).animation != game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).blueKickingAnimation) {
+                                    game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).animation = game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).blueKickingAnimation;
+                                }
+                                Gdx.app.log(this.toString(), "animation  set to kicking animation " + game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).animation);
+                                break;
+                            }
+
+                            default: {
+                                Gdx.app.log(this.toString(), " no state given ??? " + bluePlayerStatePacket.getState());
+                                break;
+                            }
+                        }
+                    }catch (Exception ex){
+                        Gdx.app.log(this.toString(), " state null ??? " + bluePlayerStatePacket.getState());
+                    }
+                    game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).setPosition(bluePlayerStatePacket.x, bluePlayerStatePacket.y);
+
+                }else {Gdx.app.log(this.toString(), "bluePlayerStatePacket.getClientId does not match a key in game.roomScreen.bluePlayers.keys " + bluePlayerStatePacket.getClientId());}
+
+                Gdx.app.log(this.toString(), "BluePlayerStatePacket Handle END");
+                return true;
+            }
+        });
+
+
         return webSocketHandler;
     }
+
+
 }

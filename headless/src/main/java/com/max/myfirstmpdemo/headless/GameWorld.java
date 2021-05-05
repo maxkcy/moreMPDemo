@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.dongbat.jbump.Item;
 import com.dongbat.jbump.World;
+import com.max.myfirstmpdemo.Packets.BluePlayerStatePacket;
 import com.max.myfirstmpdemo.Packets.BlueShirtInitPacket;
 import com.max.myfirstmpdemo.Packets.RedPlayerStatePacket;
 import com.max.myfirstmpdemo.Packets.RedShirtInitPacket;
@@ -32,6 +33,7 @@ public class GameWorld {
     Pool<BlueShirtInitPacket> blueShirtInitPacketPool;
     Pool<RedPlayerStatePacket> redPlayerStatePacketPool;
     //RedPlayerStatePacket redPlayerStatePacket;
+    BluePlayerStatePacket bluePlayerStatePacket;
 
     public void initGameWorld() {
 
@@ -62,6 +64,8 @@ public class GameWorld {
                 return new RedPlayerStatePacket();
             }
         };
+
+        bluePlayerStatePacket = new BluePlayerStatePacket();
 
         intiTeamRed();
         initTeamBlue();
@@ -95,41 +99,7 @@ public class GameWorld {
         }
 
         redPlayerStatePacketMethod();
-
-        for (Item<Entity> playerItem : playerItemListTeamBlue) {
-            if (playerItem.userData.position.x!= world.getRect(playerItem).x || playerItem.userData.position.y != world.getRect(playerItem).y
-                    && ((PlayerEntity)playerItem.userData).state != PlayerEntity.States.Kicking){
-                ((PlayerEntity)playerItem.userData).state = PlayerEntity.States.Running;
-
-                //redPlayerStatePacket.setState(RedPlayerStatePacket.States.running);
-                //redPlayerStatePacket.setPosition(world.getRect(playerItem).x, world.getRect(playerItem).y);
-
-                for (ServerWebSocket player : playersList) {
-                    //send player position packet Running
-                    /*player.writeFinalBinaryFrame(
-                            Buffer.buffer(ServerMain.manualSerializer.serialize(redPlayerStatePacket)));
-                */}
-
-                ((PlayerEntity)playerItem.userData).idleStateSent = false;
-                playerItem.userData.position.x = world.getRect(playerItem).x;
-                playerItem.userData.position.y = world.getRect(playerItem).y;
-            } else {
-                if (((PlayerEntity)playerItem.userData).idleStateSent == false){
-                    ((PlayerEntity) playerItem.userData).state = PlayerEntity.States.Idle;
-                    //send packet idleState
-                    //redPlayerStatePacket.setState(RedPlayerStatePacket.States.idle);
-                    //redPlayerStatePacket.setPosition(world.getRect(playerItem).x, world.getRect(playerItem).y);
-                    //redPlayerStatePacket.setClientId(ServerMain.clientHash.get(((PlayerEntity) playerItem.userData).playerSocket).playerID);
-                    /*for (ServerWebSocket player : playersList) {
-                        //send player position packet Idle
-                        player.writeFinalBinaryFrame(
-                                Buffer.buffer(ServerMain.manualSerializer.serialize(redPlayerStatePacket)));
-                    }*/
-
-                    ((PlayerEntity)playerItem.userData).idleStateSent = true;
-                }
-            }
-        }
+        bluePlayerStatePacketMethod();
 
     }
     public void intiTeamRed(){
@@ -155,18 +125,18 @@ public class GameWorld {
     }
         public void initTeamBlue(){
             for (int i = 1; i < playersList.size; i = i + 2) {
-                Item<Entity> playerItem = new Item<>(new PlayerEntity(300, 100 + 100 / 2 * i));
+                Item<Entity> playerItem = new Item<>(new PlayerEntity(300, 100 + 100 / 2 * (i - 1)));
                 ((PlayerEntity) playerItem.userData).startPos.x = playerItem.userData.position.x;
                 ((PlayerEntity) playerItem.userData).startPos.y = playerItem.userData.position.y;
                 ((PlayerEntity) playerItem.userData).playerSocket = playersList.get(i);
                 ServerMain.clientHash.get(((PlayerEntity) playerItem.userData).playerSocket).setClientPlayerItem(playerItem);
-                ServerMain.clientHash.get(((PlayerEntity) playerItem.userData).playerSocket).team = ClientID.Team.BLUE;
+                ServerMain.clientHash.get(((PlayerEntity) playerItem.userData).playerSocket).setTeam(ClientID.Team.BLUE);
                 playerItemListTeamBlue.add(playerItem);
                 world.add(playerItem, playerItem.userData.position.x, playerItem.userData.position.y, playerItem.userData.width, playerItem.userData.height);
                 for (ServerWebSocket client: playersList) {
                     BlueShirtInitPacket blueShirtInitPacket = blueShirtInitPacketPool.obtain();
-                    blueShirtInitPacket.setIDKey(client.toString());
-                    client.writeFinalBinaryFrame((Buffer.buffer(ServerMain.manualSerializer.serialize(blueShirtInitPacketPool.obtain()))));
+                    blueShirtInitPacket.setIDKey(((PlayerEntity) playerItem.userData).playerSocket.toString());
+                    client.writeFinalBinaryFrame((Buffer.buffer(ServerMain.manualSerializer.serialize(blueShirtInitPacket))));
                     Gdx.app.log(this.toString(), "blueShirtInitPacket Sent to: IDKey: " + client.toString());
                     blueShirtInitPacketPool.free(blueShirtInitPacket);
                 }
@@ -215,6 +185,51 @@ public class GameWorld {
                 }
             }
             redPlayerStatePacketPool.free(redPlayerStatePacket);
+
+        }
+    }
+
+    public void bluePlayerStatePacketMethod(){
+        for (Item<Entity> playerItem : playerItemListTeamBlue) {
+
+            bluePlayerStatePacket.setClientId(ServerMain.clientHash.get(((PlayerEntity) playerItem.userData).playerSocket).playerID);
+
+            if (playerItem.userData.position.x!= world.getRect(playerItem).x || playerItem.userData.position.y != world.getRect(playerItem).y
+                    && ((PlayerEntity)playerItem.userData).state != PlayerEntity.States.Kicking){
+                ((PlayerEntity)playerItem.userData).state = PlayerEntity.States.Running;
+
+                bluePlayerStatePacket.setState(BluePlayerStatePacket.States.running);
+                bluePlayerStatePacket.setPosition(world.getRect(playerItem).x, world.getRect(playerItem).y);
+
+                for (ServerWebSocket player : playersList) {
+                    //send player position packet Running
+                    player.writeFinalBinaryFrame(
+                            Buffer.buffer(ServerMain.manualSerializer.serialize(bluePlayerStatePacket)));
+                    Gdx.app.log(String.valueOf(this), "BluePlayerStatePacked running sent to " + player + " " + bluePlayerStatePacket.x + " " + bluePlayerStatePacket.y);
+                }
+
+                ((PlayerEntity)playerItem.userData).idleStateSent = false;
+                ((PlayerEntity)playerItem.userData).kickingStateSent = false;
+                playerItem.userData.position.x = world.getRect(playerItem).x;
+                playerItem.userData.position.y = world.getRect(playerItem).y;
+            } else {
+                if (!((PlayerEntity) playerItem.userData).idleStateSent){
+                    ((PlayerEntity) playerItem.userData).state = PlayerEntity.States.Idle;
+                    //send packet idleState
+                    bluePlayerStatePacket.setState(BluePlayerStatePacket.States.idle);
+                    bluePlayerStatePacket.setPosition(world.getRect(playerItem).x, world.getRect(playerItem).y);
+
+                    for (ServerWebSocket player : playersList) {
+                        //send player position packet Idle
+                        player.writeFinalBinaryFrame(
+                                Buffer.buffer(ServerMain.manualSerializer.serialize(bluePlayerStatePacket)));
+                        Gdx.app.log(this.toString(),"bluePlayerStatePacket idle (" + bluePlayerStatePacket.getState() + ") sent w/ positions " + bluePlayerStatePacket.x + " " + bluePlayerStatePacket.y +"\n " +
+                                "sent to:" + player);
+                    }
+                    ((PlayerEntity)playerItem.userData).idleStateSent = true;
+
+                }
+            }
 
         }
     }

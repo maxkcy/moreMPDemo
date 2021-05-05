@@ -9,12 +9,14 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ArrayMap;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.max.myfirstmpdemo.GameAssetsAndStuff.BluePlayer;
 import com.max.myfirstmpdemo.GameAssetsAndStuff.GameAssets;
 import com.max.myfirstmpdemo.GameAssetsAndStuff.RedPlayer;
 import com.max.myfirstmpdemo.MyFirstMpDemoMain;
 
 public class RoomScreen extends ScreenAdapter {
-MyFirstMpDemoMain game;
+
+    MyFirstMpDemoMain game;
 OrthographicCamera cam;
 FitViewport viewport;
 public BitmapFont font;
@@ -22,11 +24,13 @@ public Sprite footBallPitchBackround;
 public static String message;
 public GameAssets gameAssets;
 public ArrayMap<String, RedPlayer> redPlayers;
+public ArrayMap<String, BluePlayer> bluePlayers;
 
     public RoomScreen(MyFirstMpDemoMain game) {
         this.game = game;
         gameAssets = new GameAssets(game);
         redPlayers = new ArrayMap<>();
+        bluePlayers = new ArrayMap<>();
     }
 
     @Override
@@ -54,8 +58,11 @@ public ArrayMap<String, RedPlayer> redPlayers;
         footBallPitchBackround.draw(game.getBatch());
         font.draw(game.getBatch(), message, 85, 80);
 
-        for (RedPlayer redPlayer: redPlayers.values()) {
-            redPlayer.update(Gdx.graphics.getDeltaTime());
+        for (RedPlayer redPlayer : redPlayers.values()) {
+            redPlayer.update(delta);
+        }
+        for (BluePlayer bluePlayer : bluePlayers.values()){
+            bluePlayer.update(delta);
         }
         game.getBatch().end();
     }
