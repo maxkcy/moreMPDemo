@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ArrayMap;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -13,6 +14,7 @@ import com.max.myfirstmpdemo.GameAssetsAndStuff.BluePlayer;
 import com.max.myfirstmpdemo.GameAssetsAndStuff.GameAssets;
 import com.max.myfirstmpdemo.GameAssetsAndStuff.RedPlayer;
 import com.max.myfirstmpdemo.MyFirstMpDemoMain;
+import com.max.myfirstmpdemo.Packets.TouchDownPacket;
 
 public class RoomScreen extends ScreenAdapter {
 
@@ -25,6 +27,8 @@ public static String message;
 public GameAssets gameAssets;
 public ArrayMap<String, RedPlayer> redPlayers;
 public ArrayMap<String, BluePlayer> bluePlayers;
+Vector3 touch;
+TouchDownPacket touchDownPacket;
 
     public RoomScreen(MyFirstMpDemoMain game) {
         this.game = game;
@@ -36,6 +40,8 @@ public ArrayMap<String, BluePlayer> bluePlayers;
     @Override
     public void show() {
         super.show();
+        touch = new Vector3();
+        touchDownPacket = new TouchDownPacket();
         cam = new OrthographicCamera();
         viewport = new FitViewport(600f, 400f, cam);
         cam.position.set(viewport.getWorldWidth()/2, viewport.getWorldHeight()/2, 0);// put this line before assigning viewport to generate error
@@ -44,6 +50,7 @@ public ArrayMap<String, BluePlayer> bluePlayers;
         font = gameAssets.getSgx().getFont("font");
         message = "welcome to the game room";
     }
+
     @Override
     public void render(float delta) {
         super.render(delta);
@@ -65,6 +72,14 @@ public ArrayMap<String, BluePlayer> bluePlayers;
             bluePlayer.update(delta);
         }
         game.getBatch().end();
+
+        if (Gdx.input.isTouched()){
+            touch = viewport.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+            touchDownPacket.setX(touch.x);
+            touchDownPacket.setY(touch.y);
+            game.clientWS.webSocket.send(touchDownPacket);
+            Gdx.app.log(this.toString(), "TouchDownPacket sent");
+        }
     }
 
     @Override

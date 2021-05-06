@@ -105,6 +105,7 @@ public class ServerMain extends Game {
                     @Override
                     public void handle(WebSocketFrame event) {
                         handleFrame.handleFrame(client, event);
+                        handleFrame.handleGame(client, event);
                     }
                 });
 

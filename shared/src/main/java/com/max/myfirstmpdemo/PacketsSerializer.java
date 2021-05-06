@@ -8,6 +8,7 @@ import com.max.myfirstmpdemo.Packets.CountDownPacket;
 import com.max.myfirstmpdemo.Packets.RedPlayerStatePacket;
 import com.max.myfirstmpdemo.Packets.RedShirtInitPacket;
 import com.max.myfirstmpdemo.Packets.RoomPacket;
+import com.max.myfirstmpdemo.Packets.TouchDownPacket;
 
 public class PacketsSerializer {
 
@@ -21,5 +22,6 @@ public class PacketsSerializer {
         serializer.register(new BlueShirtInitPacket());
         serializer.register(new RedPlayerStatePacket());
         serializer.register(new BluePlayerStatePacket());
+        serializer.register(new TouchDownPacket());
     }
 }

@@ -22,7 +22,7 @@ public class PlayerEntity extends Entity{
     public boolean runningStateSent = false;
     public boolean kickingStateSent = false;
 
-    CollisionFilter collisionFilter = new CollisionFilter() {
+    public CollisionFilter collisionFilter = new CollisionFilter() {
         @Override
         public Response filter(Item item, Item other) {
             if(other.userData instanceof BallEntity);

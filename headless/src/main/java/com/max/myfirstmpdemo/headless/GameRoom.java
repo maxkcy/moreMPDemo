@@ -58,6 +58,7 @@ public class GameRoom extends ScreenAdapter {
       //System.out.println("The GameRoom has players: " + playersList);
         gameWorld = new GameWorld(playersList);
         gameWorld.initGameWorld();
+        //last edits you do, send packet to switch to room screen here and change countdown packet logic
     }
 
     @Override
