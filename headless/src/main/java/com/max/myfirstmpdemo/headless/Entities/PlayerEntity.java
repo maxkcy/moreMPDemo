@@ -26,6 +26,8 @@ public class PlayerEntity extends Entity{
         @Override
         public Response filter(Item item, Item other) {
             if(other.userData instanceof BallEntity);
+
+            ((BallEntity)other.userData).world.move()
             return Response.cross;
         }
     };

@@ -3,10 +3,13 @@ package com.max.myfirstmpdemo.headless.Entities;
 import com.dongbat.jbump.CollisionFilter;
 import com.dongbat.jbump.Item;
 import com.dongbat.jbump.Response;
+import com.dongbat.jbump.World;
 
 public class BallEntity extends Entity{
+    public World world;
     public BallEntity() {
         super((600/2) - (32/2),(400/2) - ( 32/2)  , 32, 32);
+        this.world = world;
     }
 
     public class Boundry {
@@ -24,7 +27,7 @@ public class BallEntity extends Entity{
     }
     public States state;
 
-    public void reset(){
+    public void startPosition(){
         super.position.x = (600/2) - (32/2);
         super.position.y = (400/2) - (32/2);
     }

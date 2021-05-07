@@ -8,6 +8,7 @@ import com.github.czyzby.websocket.data.WebSocketException;
 import com.max.myfirstmpdemo.GameAssetsAndStuff.BluePlayer;
 import com.max.myfirstmpdemo.GameAssetsAndStuff.RedPlayer;
 import com.max.myfirstmpdemo.MyFirstMpDemoMain;
+import com.max.myfirstmpdemo.Packets.AsteroidStatePacket;
 import com.max.myfirstmpdemo.Packets.BluePlayerStatePacket;
 import com.max.myfirstmpdemo.Packets.BlueShirtInitPacket;
 import com.max.myfirstmpdemo.Packets.RedPlayerStatePacket;
@@ -98,22 +99,25 @@ public class GameScreenListener {
                             case idle: {
                                 if (game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation != game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).redIdleAnimation) {
                                     game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).setAnimation(RedPlayer.redIdleAnimation);
+                                    Gdx.app.log(this.toString(), "animation  set to idle animation " + game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation);
+
                                 }
-                                Gdx.app.log(this.toString(), "animation  set to idle animation " + game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation);
                                 break;
                             }
                             case running: {
                                 if (game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation != game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).redRunningAnimation) {
+                                    game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).resetStatetime();
                                     game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation = game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).redRunningAnimation;
+                                    Gdx.app.log(this.toString(), "animation  set to running animation " + game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation);
+
                                 }
-                                Gdx.app.log(this.toString(), "animation  set to running animation " + game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation);
                                 break;
                             }
                             case kicking: {
                                 if (game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation != game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).redKickingAnimation) {
                                     game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation = game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).redKickingAnimation;
+                                    Gdx.app.log(this.toString(), "animation  set to kicking animation " + game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation);
                                 }
-                                Gdx.app.log(this.toString(), "animation  set to kicking animation " + game.roomScreen.redPlayers.get(redPlayerStatePacket.getClientId()).animation);
                                 break;
                             }
 
@@ -165,24 +169,25 @@ public class GameScreenListener {
                     try {
                         switch (bluePlayerStatePacket.getState()) {
                             case idle: {
-                                if (game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).animation != game.roomScreen.redPlayers.get(bluePlayerStatePacket.getClientId()).redIdleAnimation) {
+                                if (game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).animation != game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).blueIdleAnimation) {
                                     game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).setAnimation(BluePlayer.blueIdleAnimation);
+                                    Gdx.app.log(this.toString(), "animation  set to idle animation " + game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).animation);
                                 }
-                                Gdx.app.log(this.toString(), "animation  set to idle animation " + game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).animation);
                                 break;
                             }
                             case running: {
                                 if (game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).animation != game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).blueRunningAnimation) {
+                                    game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).resetStatetime();
                                     game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).animation = game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).blueRunningAnimation;
+                                    Gdx.app.log(this.toString(), "animation  set to running animation " + game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).animation);
                                 }
-                                Gdx.app.log(this.toString(), "animation  set to running animation " + game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).animation);
                                 break;
                             }
                             case kicking: {
                                 if (game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).animation != game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).blueKickingAnimation) {
                                     game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).animation = game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).blueKickingAnimation;
+                                    Gdx.app.log(this.toString(), "animation  set to kicking animation " + game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).animation);
                                 }
-                                Gdx.app.log(this.toString(), "animation  set to kicking animation " + game.roomScreen.bluePlayers.get(bluePlayerStatePacket.getClientId()).animation);
                                 break;
                             }
 
@@ -199,6 +204,17 @@ public class GameScreenListener {
                 }else {Gdx.app.log(this.toString(), "bluePlayerStatePacket.getClientId does not match a key in game.roomScreen.bluePlayers.keys " + bluePlayerStatePacket.getClientId());}
 
                 Gdx.app.log(this.toString(), "BluePlayerStatePacket Handle END");
+                return true;
+            }
+        });
+
+        webSocketHandler.registerHandler(AsteroidStatePacket.class, new WebSocketHandler.Handler<AsteroidStatePacket>(){
+            @Override
+            public boolean handle(final WebSocket webSocket, final AsteroidStatePacket asteroidStatePacket) {
+                Gdx.app.log(this.toString(), "AsteroidStatePacket Handle Start");
+                game.roomScreen.asteroidBall.setPosition(asteroidStatePacket.getX(), asteroidStatePacket.getY());
+                Gdx.app.log(this.toString(), "Asteroid StatePacket set asteroidBall position");
+                Gdx.app.log(this.toString(), "AsteroidStatePacket Handle END");
                 return true;
             }
         });

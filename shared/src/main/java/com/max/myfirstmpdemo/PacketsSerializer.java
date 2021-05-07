@@ -2,6 +2,7 @@
 package com.max.myfirstmpdemo;
 
 import com.github.czyzby.websocket.serialization.impl.ManualSerializer;
+import com.max.myfirstmpdemo.Packets.AsteroidStatePacket;
 import com.max.myfirstmpdemo.Packets.BluePlayerStatePacket;
 import com.max.myfirstmpdemo.Packets.BlueShirtInitPacket;
 import com.max.myfirstmpdemo.Packets.CountDownPacket;
@@ -23,5 +24,6 @@ public class PacketsSerializer {
         serializer.register(new RedPlayerStatePacket());
         serializer.register(new BluePlayerStatePacket());
         serializer.register(new TouchDownPacket());
+        serializer.register(new AsteroidStatePacket());
     }
 }

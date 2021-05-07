@@ -5,4 +5,5 @@ public class AnimationAtlasPaths {
     }
 
     public static String PLAYERS_ATLAS = "Players.atlas";
+    public static String ASTEROID_ATLAS = "asteroid.atlas";
 }

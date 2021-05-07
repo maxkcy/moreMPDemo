@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.dongbat.jbump.Item;
 import com.dongbat.jbump.World;
+import com.max.myfirstmpdemo.Packets.AsteroidStatePacket;
 import com.max.myfirstmpdemo.Packets.BluePlayerStatePacket;
 import com.max.myfirstmpdemo.Packets.BlueShirtInitPacket;
 import com.max.myfirstmpdemo.Packets.RedPlayerStatePacket;
@@ -29,6 +30,7 @@ public class GameWorld {
     World<Entity> world;
     BallEntity ballEntity;
     Item<Entity> ballItem;
+    AsteroidStatePacket asteroidStatePacket;
     Pool<RedShirtInitPacket> redShirtInitPacketPool;
     Pool<BlueShirtInitPacket> blueShirtInitPacketPool;
     Pool<RedPlayerStatePacket> redPlayerStatePacketPool;
@@ -40,8 +42,11 @@ public class GameWorld {
         world = new World<>(4);
         ballEntity = new BallEntity();
         ballItem = new Item<Entity>(ballEntity);
+        asteroidStatePacket = new AsteroidStatePacket();
         playerItemListTeamRed = new Array<>();
         playerItemListTeamBlue = new Array<>();
+        ((BallEntity)ballItem.userData).startPosition();
+        ((BallEntity) ballItem.userData).state = BallEntity.States.STATIC;
         world.add(ballItem, ballItem.userData.position.x, ballItem.userData.position.y, ballItem.userData.width, ballItem.userData.height);
         redShirtInitPacketPool = new Pool<RedShirtInitPacket>() {
             @Override
@@ -76,32 +81,11 @@ public class GameWorld {
     }
 
     public void update() {
-        boolean staticStateSent = false;
-        //boolean idleStateSent;
-        if (ballItem.userData.position.x != world.getRect(ballItem).x || ballItem.userData.position.y != world.getRect(ballItem).y) {
-            float angle;
-            angle = MathUtils.atan2(world.getRect(ballItem).y - ballItem.userData.position.y, ballItem.userData.position.x - ballItem.userData.position.x)
-                    * MathUtils.radiansToDegrees;
-            angle = (((angle % 360) + 360) % 360);
-            ballItem.userData.position.x = world.getRect(ballItem).x;
-            ballItem.userData.position.y = world.getRect(ballItem).y;
-
-            ((BallEntity) ballItem.userData).state = BallEntity.States.MOVING;
-            //Send BallPosition Packet, with position, angle, and enum state from a pool of ball position packets.
-            staticStateSent = false;
-        } else {
-            if (staticStateSent == false) {
-                ((BallEntity) ballItem.userData).state = BallEntity.States.STATIC;
-                //Send staticStateEnum Packet}
-                staticStateSent = true;
-            }
-
-        }
-
+        asteroidStatePacketMethod();
         redPlayerStatePacketMethod();
         bluePlayerStatePacketMethod();
-
     }
+
     public void intiTeamRed(){
         for (int i = 0; i < playersList.size; i = i + 2) {
             Item<Entity> playerItem = new Item<>(new PlayerEntity(100, 100 + 100 / 2 * i));
@@ -213,7 +197,7 @@ public class GameWorld {
                 playerItem.userData.position.x = world.getRect(playerItem).x;
                 playerItem.userData.position.y = world.getRect(playerItem).y;
             } else {
-                if (!((PlayerEntity) playerItem.userData).idleStateSent){
+                if (((PlayerEntity) playerItem.userData).idleStateSent == false){
                     ((PlayerEntity) playerItem.userData).state = PlayerEntity.States.Idle;
                     //send packet idleState
                     bluePlayerStatePacket.setState(BluePlayerStatePacket.States.idle);
@@ -232,6 +216,43 @@ public class GameWorld {
             }
 
         }
+    }
+    boolean staticSent = false;
+    public void asteroidStatePacketMethod(){
+        if (ballItem.userData.position.x != world.getRect(ballItem).x || ballItem.userData.position.y != world.getRect(ballItem).y) {
+            /*float angle;
+            angle = MathUtils.atan2(world.getRect(ballItem).y - ballItem.userData.position.y, ballItem.userData.position.x - ballItem.userData.position.x)
+                    * MathUtils.radiansToDegrees;
+            angle = (((angle % 360) + 360) % 360);*/
+            ballItem.userData.position.x = world.getRect(ballItem).x;
+            ballItem.userData.position.y = world.getRect(ballItem).y;
+
+            ((BallEntity) ballItem.userData).state = BallEntity.States.MOVING;
+
+            asteroidStatePacket.setX(ballItem.userData.position.x);
+            asteroidStatePacket.setY(ballItem.userData.position.y);
+
+            for (ServerWebSocket player : playersList) {
+                player.writeFinalBinaryFrame(Buffer.buffer(ServerMain.manualSerializer.serialize(asteroidStatePacket)));
+            Gdx.app.log(this.toString(), "asteroid position while moving sent");
+            staticSent = false;
+            }
+
+        } else {
+            if (((BallEntity) ballItem.userData).state == BallEntity.States.MOVING || staticSent == false) {
+                ((BallEntity) ballItem.userData).state = BallEntity.States.STATIC;
+                //Send staticStateEnum Packet ...honestly Static State isnt necessary for this
+                asteroidStatePacket.setX(ballItem.userData.position.x);
+                asteroidStatePacket.setY(ballItem.userData.position.y);
+                for (ServerWebSocket player : playersList) {
+                    player.writeFinalBinaryFrame(Buffer.buffer(ServerMain.manualSerializer.serialize(asteroidStatePacket)));
+                    Gdx.app.log(this.toString(), "asteroid position static moving sent");
+                }
+                staticSent = true;
+            }
+
+        }
+
     }
 }
 

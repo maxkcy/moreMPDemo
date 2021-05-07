@@ -14,6 +14,7 @@ public class BluePlayer {
     public static Animation<TextureRegion> blueRunningAnimation;
     public static Animation<TextureRegion> blueKickingAnimation;
     public Animation<TextureRegion> animation;
+    public Animation<TextureRegion> previousAnimation;
     public Animation<TextureRegion> lastAnimation;
     //   public Texture keyframeinit = new Texture(Gdx.files.internal("badlogic.png"));
 
@@ -60,7 +61,7 @@ public class BluePlayer {
     }
 
     public void update(float delta){
-        Gdx.app.log(this.toString(), String.valueOf(animation));
+        if(previousAnimation != animation){Gdx.app.log(this.toString(), String.valueOf(animation));}
         if(animation != null){
             keyframe.setRegion(animation.getKeyFrame(statetime));
             keyframe.setPosition(position.x, position.y);
@@ -68,5 +69,7 @@ public class BluePlayer {
         this.statetime += delta;
 
         keyframe.draw(game.getBatch());
+
+        previousAnimation = animation;
     }
 }

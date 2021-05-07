@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ArrayMap;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.max.myfirstmpdemo.GameAssetsAndStuff.AsteroidBall;
 import com.max.myfirstmpdemo.GameAssetsAndStuff.BluePlayer;
 import com.max.myfirstmpdemo.GameAssetsAndStuff.GameAssets;
 import com.max.myfirstmpdemo.GameAssetsAndStuff.RedPlayer;
@@ -29,12 +30,14 @@ public ArrayMap<String, RedPlayer> redPlayers;
 public ArrayMap<String, BluePlayer> bluePlayers;
 Vector3 touch;
 TouchDownPacket touchDownPacket;
+public AsteroidBall asteroidBall;
 
     public RoomScreen(MyFirstMpDemoMain game) {
         this.game = game;
         gameAssets = new GameAssets(game);
         redPlayers = new ArrayMap<>();
         bluePlayers = new ArrayMap<>();
+        asteroidBall = new AsteroidBall(game);
     }
 
     @Override
@@ -71,6 +74,8 @@ TouchDownPacket touchDownPacket;
         for (BluePlayer bluePlayer : bluePlayers.values()){
             bluePlayer.update(delta);
         }
+
+        asteroidBall.update(delta);
         game.getBatch().end();
 
         if (Gdx.input.isTouched()){
