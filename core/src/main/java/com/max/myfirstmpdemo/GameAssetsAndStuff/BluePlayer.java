@@ -68,6 +68,8 @@ public class BluePlayer {
         }else {Gdx.app.log(this.toString(), "animation is null");}
         this.statetime += delta;
 
+        keyframe.setRegionWidth(24);
+        keyframe.setRegionHeight(24);
         keyframe.draw(game.getBatch());
 
         previousAnimation = animation;

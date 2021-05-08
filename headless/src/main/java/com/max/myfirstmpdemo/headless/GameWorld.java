@@ -40,7 +40,7 @@ public class GameWorld {
     public void initGameWorld() {
 
         world = new World<>(4);
-        ballEntity = new BallEntity();
+        ballEntity = new BallEntity(world);
         ballItem = new Item<Entity>(ballEntity);
         asteroidStatePacket = new AsteroidStatePacket();
         playerItemListTeamRed = new Array<>();

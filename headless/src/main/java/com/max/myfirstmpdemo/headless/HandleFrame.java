@@ -66,8 +66,6 @@ ServerMain serverMain;
             clientID.getClientGameRoom().gameWorld.world.move(clientID.getClientPlayerItem(), newX, newY,
                     ((PlayerEntity)clientID.getClientPlayerItem().userData).collisionFilter);
 
-            //clientID.getClientPlayerItem().userData.position.x = clientID.getClientGameRoom().gameWorld.world.getRect(clientID.getClientPlayerItem()).x;
-            //clientID.getClientPlayerItem().userData.position.y = clientID.getClientGameRoom().gameWorld.world.getRect(clientID.getClientPlayerItem()).y;
         }
     }
 }

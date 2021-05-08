@@ -7,7 +7,7 @@ import com.dongbat.jbump.World;
 
 public class BallEntity extends Entity{
     public World world;
-    public BallEntity() {
+    public BallEntity(World world) {
         super((600/2) - (32/2),(400/2) - ( 32/2)  , 32, 32);
         this.world = world;
     }

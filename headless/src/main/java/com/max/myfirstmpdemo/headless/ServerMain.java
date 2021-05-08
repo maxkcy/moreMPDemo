@@ -58,12 +58,12 @@ public class ServerMain extends Game {
             for (int playersToBeAdded = 2; i < playersToBeAdded; i++){
             gameRoom.playersList.add(waitingForGameQueue.first());
             clientHash.get(waitingForGameQueue.first()).setClientGameRoom(gameRoom);
-            Gdx.app.log(this.toString(), waitingForGameQueue.first() + " added to gameRoom.playersList");
+            Gdx.app.log(this.toString(), waitingForGameQueue.first() + " added to gameRoom.playersList. Num of players in queue: " + waitingForGameQueue.size);
             waitingForGameQueue.removeFirst();
             }
             System.out.println("The GameRoom has players: " + gameRoom.playersList);
             gameRoomArray.add(gameRoom);
-            waitingForGameQueue.clear();
+            //waitingForGameQueue.clear();
             gameRoom.show();
         }
 

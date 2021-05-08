@@ -1,5 +1,6 @@
 package com.max.myfirstmpdemo.headless.Entities;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.dongbat.jbump.CollisionFilter;
 import com.dongbat.jbump.Item;
@@ -26,8 +27,14 @@ public class PlayerEntity extends Entity{
         @Override
         public Response filter(Item item, Item other) {
             if(other.userData instanceof BallEntity);
+            float angle = MathUtils.atan2((((BallEntity)other.userData).position.y ) - (((PlayerEntity)item.userData).position.y ),
+                    (((BallEntity)other.userData).position.x) - (((PlayerEntity)item.userData).position.x)) * MathUtils.radiansToDegrees;
 
-            ((BallEntity)other.userData).world.move()
+            angle = (((angle % 360) + 360) % 360);
+            ((BallEntity)other.userData).world.move(other, (((BallEntity)other.userData).position.x) + (MathUtils.cosDeg(angle) * 2),
+                    (((BallEntity)other.userData).position.y) + (MathUtils.sinDeg(angle) * 2), ((BallEntity) other.userData).collisionFilter);
+            //((BallEntity)other.userData).position.x = ((BallEntity)other.userData).world.getRect(other).x;
+            //((BallEntity)other.userData).position.y = ((BallEntity)other.userData).world.getRect(other).y;
             return Response.cross;
         }
     };

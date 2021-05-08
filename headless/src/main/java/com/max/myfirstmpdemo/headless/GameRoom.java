@@ -73,7 +73,7 @@ public class GameRoom extends ScreenAdapter {
             countDownPacket.setTime(time);
             //System.out.println(countDownPacket.getTime());
             serverWebSocket.writeFinalBinaryFrame(Buffer.buffer(serverMain.manualSerializer.serialize(countDownPacket)));
-            Gdx.app.log(this.toString(), "CountDownPacket w/ time: " + countDownPacket.getTime() + " sent to: " + serverWebSocket);
+            //Gdx.app.log(this.toString(), "CountDownPacket w/ time: " + countDownPacket.getTime() + " sent to: " + serverWebSocket);
             countDownPacketPool.free(countDownPacket);
             }
         //System.out.println("Countdown packets sent");
