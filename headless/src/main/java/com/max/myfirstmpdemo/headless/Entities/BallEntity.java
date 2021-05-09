@@ -32,7 +32,7 @@ public class BallEntity extends Entity{
         super.position.y = (400/2) - (32/2);
     }
 
-    CollisionFilter collisionFilter = new CollisionFilter() {
+   public CollisionFilter collisionFilter = new CollisionFilter() {
         @Override
         public Response filter(Item item, Item other) {
             if(other.userData instanceof Entity);

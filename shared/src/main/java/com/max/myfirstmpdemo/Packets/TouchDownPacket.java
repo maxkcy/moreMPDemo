@@ -5,8 +5,9 @@ import com.github.czyzby.websocket.serialization.Transferable;
 import com.github.czyzby.websocket.serialization.impl.Deserializer;
 import com.github.czyzby.websocket.serialization.impl.Serializer;
 
-public class TouchDownPacket implements Transferable<TouchDownPacket> {
+import io.vertx.core.http.ServerWebSocket;
 
+public class TouchDownPacket implements Transferable<TouchDownPacket> {
 
     float x;
     float y;
@@ -33,6 +34,19 @@ public class TouchDownPacket implements Transferable<TouchDownPacket> {
     public void setY(float y) {
         this.y = y;
     }
+
+    ServerWebSocket serverWebSocket; //unitialized. this comment to show how pointers work.
+
+    public void setServerWebSocket(ServerWebSocket serverWebSocket) {
+        this.serverWebSocket = serverWebSocket;
+    }
+
+    public ServerWebSocket getServerWebSocket() {
+        return serverWebSocket;
+    }
+
+
+
     @Override
     public void serialize(Serializer serializer) throws SerializationException {
         serializer.serializeFloat(x);

@@ -10,7 +10,7 @@ public class AsteroidBall {
     MyFirstMpDemoMain game;
     public static Animation<TextureRegion> asteroidAnimation;
     public Sprite keyframe;
-
+    private Sprite unInitSpriteTest;
 
 
     public Vector2 position = new Vector2(); //null position is (0,0) by default
@@ -24,6 +24,7 @@ public class AsteroidBall {
         asteroidAnimation = new Animation<TextureRegion>(1/5f, game.splashScreen.gameAssets.asteroidTextureAtlas.findRegions("asteroid"));
         asteroidAnimation.setPlayMode(Animation.PlayMode.LOOP);
         keyframe = new Sprite(game.splashScreen.gameAssets.asteroidTextureAtlas.createSprites().get(0));
+        unInitSpriteTest = keyframe;
     }
 
     public float stateTime = 0;
@@ -34,6 +35,8 @@ public class AsteroidBall {
         keyframe.setPosition(position.x, position.y);
         if(true){ //true will be false when state on server side is static
         stateTime += delta;}
+        //unInitSpriteTest.setBounds(10, 10, 32, 32);
+        //unInitSpriteTest.draw(game.getBatch());
         keyframe.draw(game.getBatch());
     }
 

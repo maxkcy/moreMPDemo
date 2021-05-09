@@ -24,26 +24,27 @@ ServerMain serverMain;
         request = serverMain.manualSerializer.deserialize(frame.binaryData().getBytes());
         System.out.println("Received packet: " + request + " from: RA " + webSocket.remoteAddress());
 
+
+
         if (request instanceof RoomPacket){
             //System.out.println("RoomPact RoomEnum: " + ((RoomPacket) request).roomEnum);
             Gdx.app.log(this.toString(), "RoomPact RoomEnum: " + ((RoomPacket) request).roomEnum);
             if(((RoomPacket) request).roomEnum == RoomEnum.QUE){
                 serverMain.waitingForGameQueue.addLast(webSocket);
                 //System.out.println("client " + webSocket + " added to que");
-                Gdx.app.log(this.toString(), "client " + webSocket + " added to que");
+                Gdx.app.log(this.toString(), "client " + webSocket + " added to queue");
                 final RoomPacket response = new RoomPacket(RoomEnum.QUE);
                 response.roomEnum = RoomEnum.QUE;
                 webSocket.writeFinalBinaryFrame(Buffer.buffer(serverMain.manualSerializer.serialize(response)));
                 //System.out.println("sent response confirming client added to que");
-                Gdx.app.log(this.toString(), "sent response confirming client added to que");
+                Gdx.app.log(this.toString(), "sent response confirming client added to queue");
             }
         }
-
     }
 
     public void handleGame(ServerWebSocket webSocket, final WebSocketFrame frame){
         if (request instanceof TouchDownPacket){
-            Gdx.app.log(this.toString(), "TouchDownPacket from: " + webSocket);
+            /*Gdx.app.log(this.toString(), "TouchDownPacket from: " + webSocket);
             ClientID clientID = ServerMain.clientHash.get(webSocket);
             float angle = MathUtils.atan2(((TouchDownPacket) request).getY() - clientID.getClientPlayerItem().userData.position.y,
                     ((TouchDownPacket) request).getX() - clientID.getClientPlayerItem().userData.position.x)
@@ -65,7 +66,11 @@ ServerMain serverMain;
 
             clientID.getClientGameRoom().gameWorld.world.move(clientID.getClientPlayerItem(), newX, newY,
                     ((PlayerEntity)clientID.getClientPlayerItem().userData).collisionFilter);
-
+                    */
+           if (ServerMain.clientHash.get(webSocket).getClientGameRoom().packetQueue.size() < ServerMain.clientHash.get(webSocket).getClientGameRoom().cap){
+               ((TouchDownPacket) request).setServerWebSocket(webSocket);
+               ServerMain.clientHash.get(webSocket).getClientGameRoom().packetQueue.add((TouchDownPacket)request);
+           }
         }
     }
 }
