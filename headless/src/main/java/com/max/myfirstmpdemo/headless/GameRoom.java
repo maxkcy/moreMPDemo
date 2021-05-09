@@ -153,8 +153,10 @@ public class GameRoom extends ScreenAdapter {
                 if (((PlayerEntity) clientID.getClientPlayerItem().userData).touchedBall == true){
 
                     (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity).world.move(((PlayerEntity) clientID.getClientPlayerItem().userData).worldBallItem,
-                            (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity.position.x) + (MathUtils.cosDeg(angle) * 2),
-                            (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity.position.y) + (MathUtils.sinDeg(angle) * 2), ((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity.collisionFilter);
+                            (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity).world.getRect(((PlayerEntity) clientID.getClientPlayerItem().userData).worldBallItem).x + (MathUtils.cosDeg(angle) * 7),
+                            (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity).world.getRect(((PlayerEntity) clientID.getClientPlayerItem().userData).worldBallItem).y + (MathUtils.sinDeg(angle) * 7), ((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity.collisionFilter);
+
+                    ((PlayerEntity) clientID.getClientPlayerItem().userData).touchedBall = false;
                 }
 
 

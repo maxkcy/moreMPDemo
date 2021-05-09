@@ -46,7 +46,7 @@ public class PlayerEntity extends Entity{
                 Gdx.app.log(this.toString(), "touched ball is TRUE");
                 //((BallEntity)other.userData).position.x = ((BallEntity)other.userData).world.getRect(other).x;
                 //((BallEntity)other.userData).position.y = ((BallEntity)other.userData).world.getRect(other).y;
-                return Response.cross;
+                return Response.touch;
 
             } else{touchedBall = false;
                 Gdx.app.log(this.toString(), "touched ball is false");}

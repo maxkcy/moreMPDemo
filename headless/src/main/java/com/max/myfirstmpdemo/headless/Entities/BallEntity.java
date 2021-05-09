@@ -36,7 +36,7 @@ public class BallEntity extends Entity{
         @Override
         public Response filter(Item item, Item other) {
             if(other.userData instanceof Entity);
-            return Response.bounce;
+            return Response.touch;
         }
     };
 
