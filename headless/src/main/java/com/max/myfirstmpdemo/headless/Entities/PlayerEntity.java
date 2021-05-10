@@ -33,10 +33,10 @@ public class PlayerEntity extends Entity{
         @Override
         public Response filter(Item item, Item other) {
             if(other.userData instanceof BallEntity) {
-                angle = MathUtils.atan2((((BallEntity) other.userData).position.y) - (((PlayerEntity) item.userData).position.y),
-                        (((BallEntity) other.userData).position.x) - (((PlayerEntity) item.userData).position.x)) * MathUtils.radiansToDegrees;
+                //angle = MathUtils.atan2((((BallEntity) other.userData).position.y) - (((PlayerEntity) item.userData).position.y),
+                  //      (((BallEntity) other.userData).position.x) - (((PlayerEntity) item.userData).position.x)) * MathUtils.radiansToDegrees;
 
-                angle = (((angle % 360) + 360) % 360);
+                //angle = (((angle % 360) + 360) % 360);
                 ballEntity = ((BallEntity)other.userData);
                 worldBallItem = other;
 

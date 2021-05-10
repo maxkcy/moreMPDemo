@@ -99,5 +99,6 @@ public AsteroidBall asteroidBall;
     public void dispose() {
         super.dispose();
         redPlayers.clear();
+        bluePlayers.clear();
     }
 }

@@ -29,9 +29,6 @@ public class GameRoom extends ScreenAdapter {
     public boolean isActive;// = true;
     public GameWorld gameWorld;
 
-    public ConcurrentLinkedQueue<Transferable> packetQueue = new ConcurrentLinkedQueue<Transferable>();
-    public Array<Transferable> workList = new Array();
-    Transferable element;
 
 
     //public CountDownPacket countDownPacket = new CountDownPacket(300.0f);
@@ -77,7 +74,6 @@ public class GameRoom extends ScreenAdapter {
         //last edits you do, send packet to switch to room screen here and change countdown packet logic
     }
 
-    public int cap = 20000;
 
     @Override
     public void render(float delta) {
@@ -116,53 +112,7 @@ public class GameRoom extends ScreenAdapter {
         time = time - delta;
 
 
-        for (int i = 0; i <= cap && (element = packetQueue.poll()) != null; i++) {
-            workList.add(element);
-        }
 
-        for (Transferable elemento : workList) {
-
-            if (elemento instanceof TouchDownPacket) {
-                Gdx.app.log(this.toString(), "TouchDownPacket from: " + ((TouchDownPacket) elemento).getServerWebSocket());
-                ClientID clientID = ServerMain.clientHash.get(((TouchDownPacket) elemento).getServerWebSocket());
-                float angle = MathUtils.atan2(((TouchDownPacket) elemento).getY() - clientID.getClientPlayerItem().userData.position.y,
-                        ((TouchDownPacket) elemento).getX() - clientID.getClientPlayerItem().userData.position.x)
-                        * MathUtils.radiansToDegrees;
-                angle = (((angle % 360) + 360) % 360);
-
-                float newX;
-                float newY;
-
-                if (((TouchDownPacket) elemento).getX() - clientID.getClientPlayerItem().userData.position.x < -5 ||
-                        ((TouchDownPacket) elemento).getX() - clientID.getClientPlayerItem().userData.position.x > 5) {
-                    newX = clientID.getClientPlayerItem().userData.position.x + MathUtils.cosDeg(angle) * 5;
-                } else {
-                    newX = ((TouchDownPacket) elemento).getX();
-                }
-
-                if (((TouchDownPacket) elemento).getY() - clientID.getClientPlayerItem().userData.position.y < -5 ||
-                        ((TouchDownPacket) elemento).getY() - clientID.getClientPlayerItem().userData.position.y > 5) {
-                    newY = clientID.getClientPlayerItem().userData.position.y + MathUtils.sinDeg(angle) * 5;
-                } else {
-                    newY = ((TouchDownPacket) elemento).getY();
-                }
-
-                clientID.getClientGameRoom().gameWorld.world.move(clientID.getClientPlayerItem(), newX, newY,
-                        ((PlayerEntity) clientID.getClientPlayerItem().userData).collisionFilter);
-
-                if (((PlayerEntity) clientID.getClientPlayerItem().userData).touchedBall == true){
-
-                    (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity).world.move(((PlayerEntity) clientID.getClientPlayerItem().userData).worldBallItem,
-                            (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity).world.getRect(((PlayerEntity) clientID.getClientPlayerItem().userData).worldBallItem).x + (MathUtils.cosDeg(angle) * 7),
-                            (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity).world.getRect(((PlayerEntity) clientID.getClientPlayerItem().userData).worldBallItem).y + (MathUtils.sinDeg(angle) * 7), ((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity.collisionFilter);
-
-                    ((PlayerEntity) clientID.getClientPlayerItem().userData).touchedBall = false;
-                }
-
-
-            }
-        }
-    workList.clear();
     }
 
         @Override

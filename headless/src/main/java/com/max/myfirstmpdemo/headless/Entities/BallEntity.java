@@ -12,14 +12,14 @@ public class BallEntity extends Entity{
         this.world = world;
     }
 
-    public class Boundry {
-        public int boundryXLeft = 0;
-        public int boundryXRight = 600;
-        public int boundryYBottom = 0;
-        public int boundryYtop = 400;
+    public class Boundary {
+        public int boundaryXLeft = 0;
+        public int boundaryXRight = 600;
+        public int boundaryYBottom = 0;
+        public int boundaryYtop = 400;
     }
 
-    public Boundry boundry = new Boundry();
+    public Boundary boundary = new Boundary();
 
     public enum States{
         STATIC,
@@ -27,7 +27,7 @@ public class BallEntity extends Entity{
     }
     public States state;
 
-    public void startPosition(){
+    public void resetPosition(){
         super.position.x = (600/2) - (32/2);
         super.position.y = (400/2) - (32/2);
     }
@@ -36,7 +36,7 @@ public class BallEntity extends Entity{
         @Override
         public Response filter(Item item, Item other) {
             if(other.userData instanceof Entity);
-            return Response.touch;
+            return Response.bounce;
         }
     };
 

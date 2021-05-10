@@ -67,9 +67,9 @@ ServerMain serverMain;
             clientID.getClientGameRoom().gameWorld.world.move(clientID.getClientPlayerItem(), newX, newY,
                     ((PlayerEntity)clientID.getClientPlayerItem().userData).collisionFilter);
                     */
-           if (ServerMain.clientHash.get(webSocket).getClientGameRoom().packetQueue.size() < ServerMain.clientHash.get(webSocket).getClientGameRoom().cap){
+           if (ServerMain.clientHash.get(webSocket).getClientGameRoom().gameWorld.packetQueue.size() < ServerMain.clientHash.get(webSocket).getClientGameRoom().gameWorld.cap){
                ((TouchDownPacket) request).setServerWebSocket(webSocket);
-               ServerMain.clientHash.get(webSocket).getClientGameRoom().packetQueue.add((TouchDownPacket)request);
+               ServerMain.clientHash.get(webSocket).getClientGameRoom().gameWorld.packetQueue.add((TouchDownPacket)request);
            }
         }
     }
