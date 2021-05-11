@@ -6,12 +6,15 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ArrayMap;
 import com.badlogic.gdx.utils.Queue;
 import com.github.czyzby.websocket.serialization.impl.ManualSerializer;
+import com.max.myfirstmpdemo.Packets.BlueShirtInitPacket;
+import com.max.myfirstmpdemo.Packets.RedShirtInitPacket;
 import com.max.myfirstmpdemo.PacketsSerializer;
 import com.max.myfirstmpdemo.Tools;
 
 
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.ServerWebSocket;
@@ -124,8 +127,32 @@ public class ServerMain extends Game {
                         if(handled == false){
                             for (GameRoom gameRoom : gameRoomArray) {
                                 if (gameRoom.playersList.contains(client, true)) {
+
+
+                                    if (clientHash.get(client).getTeam() == ClientID.Team.BLUE){
+                                        gameRoom.gameWorld.playerItemListTeamBlue.removeValue(clientHash.get(client).getClientPlayerItem(), true);
+                                        BlueShirtInitPacket blueShirtInitPacket = new BlueShirtInitPacket();
+                                        blueShirtInitPacket.setIDKey(clientHash.get(client).playerID);
+                                        for (ServerWebSocket player : gameRoom.playersList){
+                                            player.writeFinalBinaryFrame((Buffer.buffer(ServerMain.manualSerializer.serialize(blueShirtInitPacket))));
+                                        }
+
+                                    }else if(clientHash.get(client).getTeam() == ClientID.Team.RED){
+                                        RedShirtInitPacket redShirtInitPacket = new RedShirtInitPacket();
+                                        redShirtInitPacket.setIDKey(clientHash.get(client).playerID);
+                                        for (ServerWebSocket player : gameRoom.playersList){
+                                            player.writeFinalBinaryFrame((Buffer.buffer(ServerMain.manualSerializer.serialize(redShirtInitPacket))));
+                                        }
+                                        gameRoom.gameWorld.playerItemListTeamRed.removeValue(clientHash.get(client).getClientPlayerItem(), true);
+                                    }
+                                    gameRoom.gameWorld.world.remove(clientHash.get(client).getClientPlayerItem());
                                     ServerMain.clientHash.get(client).setClientPlayerItem(null);
+                                    clientHash.get(client).setTeam(null);
+                                    gameRoom.gameWorld.playersList.removeValue(client, true);
                                     gameRoom.playersList.removeValue(client, true);
+                                    clientHash.get(client).setClientGameRoom(null);
+
+
                                 break;
                                 }
                             }

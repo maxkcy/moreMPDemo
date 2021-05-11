@@ -72,10 +72,13 @@ public class GameScreenListener {
             public boolean handle(final WebSocket webSocket, final RedShirtInitPacket redShirtInitPacket) {
 
                     Gdx.app.log(this.toString(), "RedShirtInitPacket Handle START");
-                    if(game.roomScreen.redPlayers != null){
+                    if(game.roomScreen.redPlayers != null && !game.roomScreen.redPlayers.containsKey(redShirtInitPacket.IDKey)){
                 game.roomScreen.redPlayers.put(redShirtInitPacket.IDKey, new RedPlayer(game));
-                    Gdx.app.log(this.toString(), "new player " + redShirtInitPacket.IDKey + " added to: game.roomScreen.redPlayers");}
-                else{
+                    Gdx.app.log(this.toString(), "new player " + redShirtInitPacket.IDKey + " added to: game.roomScreen.redPlayers");
+                    }else if(game.roomScreen.redPlayers.containsKey(redShirtInitPacket.IDKey)){
+                        game.roomScreen.redPlayers.removeValue(game.roomScreen.redPlayers.get(redShirtInitPacket.IDKey), true);
+                        game.roomScreen.redPlayers.removeKey(redShirtInitPacket.IDKey);
+                    }else{
                     Gdx.app.log(this.toString(), "game.roomScreen.redPlayers == null");}
 
 
@@ -143,10 +146,13 @@ public class GameScreenListener {
             @Override
             public boolean handle(final WebSocket webSocket, final BlueShirtInitPacket blueShirtInitPacket) {
                 Gdx.app.log(this.toString(), "BlueShirtInitPacket Handle START");
-                if(game.roomScreen.bluePlayers != null){
+                if(game.roomScreen.bluePlayers != null && !game.roomScreen.bluePlayers.containsKey(blueShirtInitPacket.IDKey)){
                     game.roomScreen.bluePlayers.put(blueShirtInitPacket.IDKey, new BluePlayer(game));
-                    Gdx.app.log(this.toString(), "new player " + blueShirtInitPacket.IDKey + " added to: game.roomScreen.BluePlayers");}
-                else{
+                    Gdx.app.log(this.toString(), "new player " + blueShirtInitPacket.IDKey + " added to: game.roomScreen.BluePlayers");
+                }else if(game.roomScreen.bluePlayers.containsKey(blueShirtInitPacket.IDKey)){
+                    game.roomScreen.bluePlayers.removeValue(game.roomScreen.bluePlayers.get(blueShirtInitPacket.IDKey), true);
+                    game.roomScreen.bluePlayers.removeKey(blueShirtInitPacket.IDKey);
+                } else{
                     Gdx.app.log(this.toString(), "game.roomScreen.bluePlayers == null");}
 
 

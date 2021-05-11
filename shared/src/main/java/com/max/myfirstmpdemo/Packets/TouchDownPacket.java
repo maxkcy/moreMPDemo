@@ -35,6 +35,7 @@ public class TouchDownPacket implements Transferable<TouchDownPacket> {
         this.y = y;
     }
 
+    //comment out stuff under for html dist builds
     ServerWebSocket serverWebSocket; //unitialized. this comment to show how pointers work.
 
     public void setServerWebSocket(ServerWebSocket serverWebSocket) {

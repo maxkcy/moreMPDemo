@@ -33,13 +33,13 @@ public class ClientWS {
     }
 
     public void init(){
-        //String wss;
-        //wss = WebSockets.toSecureWebSocketUrl("maxkcyfun.fun", 443);
-        //System.out.println(wss);
+        String wss;
+        wss = WebSockets.toSecureWebSocketUrl("maxkcyfun.fun", 443);
+        System.out.println(wss);
+        //webSocket = WebSockets.newSocket(wss + "myws");
 
         webSocket = WebSockets.newSocket(WebSockets.toWebSocketUrl("localhost", 8778));
 
-  
         System.out.println(webSocket.isSecure());
         //inorder for the initialization error to go away call
         // ...it's important CommonWebSockets.initiate(); in the launcher.
