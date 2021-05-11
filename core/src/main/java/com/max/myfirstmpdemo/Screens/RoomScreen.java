@@ -83,7 +83,7 @@ public AsteroidBall asteroidBall;
             touchDownPacket.setX(touch.x);
             touchDownPacket.setY(touch.y);
             game.clientWS.webSocket.send(touchDownPacket);
-            Gdx.app.log(this.toString(), "TouchDownPacket sent");
+            Gdx.app.log(this.toString(), "TouchDownPacket sent with coords " + touch.x + " " + touch.y);
         }
     }
 

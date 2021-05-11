@@ -36,7 +36,7 @@ public class ClientWS {
         String wss;
         wss = WebSockets.toSecureWebSocketUrl("maxkcyfun.fun", 443);
         System.out.println(wss);
-        //webSocket = WebSockets.newSocket(wss + "myws");
+        //webSocket = WebSockets.newSocket(wss + "myws"); //switch servers bt selecting a websocket and commenting out the other
 
         webSocket = WebSockets.newSocket(WebSockets.toWebSocketUrl("localhost", 8778));
 

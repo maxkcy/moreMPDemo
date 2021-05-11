@@ -91,6 +91,7 @@ public class GameWorld {
         bluePlayerStatePacketMethod();
         packetHandlingMethod();
         checkBallBoundaries();
+        checkGoal();
     }
 
     public void intiTeamRed(){
@@ -227,23 +228,29 @@ public class GameWorld {
     boolean staticSent = false;
     public void asteroidStatePacketMethod(){
         if (ballItem.userData.position.x != world.getRect(ballItem).x || ballItem.userData.position.y != world.getRect(ballItem).y) {
-            /*float angle;
-            angle = MathUtils.atan2(world.getRect(ballItem).y - ballItem.userData.position.y, ballItem.userData.position.x - ballItem.userData.position.x)
+            float angle;
+            angle = MathUtils.atan2(world.getRect(ballItem).y - ballItem.userData.position.y, world.getRect(ballItem).x - ballItem.userData.position.x)
                     * MathUtils.radiansToDegrees;
-            angle = (((angle % 360) + 360) % 360);*/
-            ballItem.userData.position.x = world.getRect(ballItem).x;
-            ballItem.userData.position.y = world.getRect(ballItem).y;
+            angle = (((angle % 360) + 360) % 360);
 
-            ((BallEntity) ballItem.userData).state = BallEntity.States.MOVING;
+            if(world.getRect(ballItem).x - ballItem.userData.position.x <= 7 && world.getRect(ballItem).y - ballItem.userData.position.y <= 7 ) {
+                ballItem.userData.position.x = world.getRect(ballItem).x;
+                ballItem.userData.position.y = world.getRect(ballItem).y;
 
-            asteroidStatePacket.setX(ballItem.userData.position.x);
-            asteroidStatePacket.setY(ballItem.userData.position.y);
+                ((BallEntity) ballItem.userData).state = BallEntity.States.MOVING;
 
-            for (ServerWebSocket player : playersList) {
-                player.writeFinalBinaryFrame(Buffer.buffer(ServerMain.manualSerializer.serialize(asteroidStatePacket)));
-            Gdx.app.log(this.toString(), "asteroid position while moving sent");
-            staticSent = false;
+                asteroidStatePacket.setX(ballItem.userData.position.x);
+                asteroidStatePacket.setY(ballItem.userData.position.y);
+            }else {
+                world.update(ballItem, ballItem.userData.position.x + (MathUtils.cosDeg(angle) * 7f), ballItem.userData.position.y + (MathUtils.sinDeg(angle) * 7f));
+                //world.update(ballItem, ballItem.userData.position.x, ballItem.userData.position.y);
             }
+
+                for (ServerWebSocket player : playersList) {
+                    player.writeFinalBinaryFrame(Buffer.buffer(ServerMain.manualSerializer.serialize(asteroidStatePacket)));
+                    Gdx.app.log(this.toString(), "asteroid position while moving sent");
+                    staticSent = false;
+                }
 
         } else {
             if (((BallEntity) ballItem.userData).state == BallEntity.States.MOVING || staticSent == false) {
@@ -383,6 +390,25 @@ public class GameWorld {
                 hitWallYbottomCount = 1;
             }
 
+        }
+
+        int redScore = 0;
+        int blueScore = 0;
+        public void checkGoal(){
+            if(world.getRect(ballItem).x <= 10 && (world.getRect(ballItem).y < 210 && world.getRect(ballItem).y > 160)){
+                blueScore++;
+               ((BallEntity)ballItem.userData).resetPosition();
+               //world.getRect(ballItem).x = ballItem.userData.position.x;
+               //world.getRect(ballItem).y = ballItem.userData.position.y;
+               world.update(ballItem, ballItem.userData.position.x, ballItem.userData.position.y);
+               staticSent = false;
+            }
+            if(world.getRect(ballItem).x >= 590 && (world.getRect(ballItem).y < 210 && world.getRect(ballItem).y > 160)){
+                redScore++;
+                ((BallEntity)ballItem.userData).resetPosition();
+                world.update(ballItem, ballItem.userData.position.x, ballItem.userData.position.y);
+                staticSent = false;
+            }
         }
 
 
