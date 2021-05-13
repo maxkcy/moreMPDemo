@@ -13,6 +13,7 @@ import com.max.myfirstmpdemo.Packets.BluePlayerStatePacket;
 import com.max.myfirstmpdemo.Packets.BlueShirtInitPacket;
 import com.max.myfirstmpdemo.Packets.RedPlayerStatePacket;
 import com.max.myfirstmpdemo.Packets.RedShirtInitPacket;
+import com.max.myfirstmpdemo.Packets.ScorePacket;
 
 import static com.max.myfirstmpdemo.Packets.RedPlayerStatePacket.States.*;
 
@@ -221,6 +222,26 @@ public class GameScreenListener {
                 game.roomScreen.asteroidBall.setPosition(asteroidStatePacket.getX(), asteroidStatePacket.getY());
                 Gdx.app.log(this.toString(), "Asteroid StatePacket set asteroidBall position");
                 Gdx.app.log(this.toString(), "AsteroidStatePacket Handle END");
+                return true;
+            }
+        });
+
+        webSocketHandler.registerHandler(ScorePacket.class, new WebSocketHandler.Handler<ScorePacket>() {
+            @Override
+            public boolean handle(WebSocket webSocket, ScorePacket scorePacket) {
+                Gdx.app.log(this.toString(), "ScorePacket Handle Start");
+                switch (scorePacket.getTeam()){
+                    case Red:{
+                        game.roomScreen.hud.setRedScore(scorePacket.getScore());
+                        break;
+                    }
+
+                    case Blue:{
+                        game.roomScreen.hud.setBlueScore(scorePacket.getScore());
+                        break;
+                    }
+                }
+                Gdx.app.log(this.toString(), "ScorePacket End");
                 return true;
             }
         });

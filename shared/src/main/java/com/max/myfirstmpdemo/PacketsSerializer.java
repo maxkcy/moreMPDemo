@@ -6,9 +6,11 @@ import com.max.myfirstmpdemo.Packets.AsteroidStatePacket;
 import com.max.myfirstmpdemo.Packets.BluePlayerStatePacket;
 import com.max.myfirstmpdemo.Packets.BlueShirtInitPacket;
 import com.max.myfirstmpdemo.Packets.CountDownPacket;
+import com.max.myfirstmpdemo.Packets.TouchUpPacket;
 import com.max.myfirstmpdemo.Packets.RedPlayerStatePacket;
 import com.max.myfirstmpdemo.Packets.RedShirtInitPacket;
 import com.max.myfirstmpdemo.Packets.RoomPacket;
+import com.max.myfirstmpdemo.Packets.ScorePacket;
 import com.max.myfirstmpdemo.Packets.TouchDownPacket;
 
 public class PacketsSerializer {
@@ -25,5 +27,7 @@ public class PacketsSerializer {
         serializer.register(new BluePlayerStatePacket());
         serializer.register(new TouchDownPacket());
         serializer.register(new AsteroidStatePacket());
+        serializer.register(new ScorePacket());
+        serializer.register(new TouchUpPacket());
     }
 }

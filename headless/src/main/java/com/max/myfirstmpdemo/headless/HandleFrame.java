@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.max.myfirstmpdemo.Packets.RoomEnum;
 import com.max.myfirstmpdemo.Packets.RoomPacket;
 import com.max.myfirstmpdemo.Packets.TouchDownPacket;
+import com.max.myfirstmpdemo.Packets.TouchUpPacket;
 import com.max.myfirstmpdemo.headless.Entities.PlayerEntity;
 
 
@@ -71,6 +72,12 @@ ServerMain serverMain;
                ((TouchDownPacket) request).setServerWebSocket(webSocket);
                ServerMain.clientHash.get(webSocket).getClientGameRoom().gameWorld.packetQueue.add((TouchDownPacket)request);
            }
+        }
+        if(request instanceof TouchUpPacket){
+            if(ServerMain.clientHash.get(webSocket).getClientGameRoom().gameWorld.packetQueue.size() < ServerMain.clientHash.get(webSocket).getClientGameRoom().gameWorld.cap){
+                ((TouchUpPacket)request).setServerWebSocket(webSocket);
+                ServerMain.clientHash.get(webSocket).getClientGameRoom().gameWorld.packetQueue.add((TouchUpPacket)request);
+            }
         }
     }
 }

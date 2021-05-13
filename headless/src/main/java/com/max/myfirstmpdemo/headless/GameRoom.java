@@ -79,7 +79,7 @@ public class GameRoom extends ScreenAdapter {
     public void render(float delta) {
         //super.render(delta);
         if (isActive) {
-            gameWorld.update();
+            gameWorld.update(delta);
 
             for (ServerWebSocket serverWebSocket :
                     playersList) {

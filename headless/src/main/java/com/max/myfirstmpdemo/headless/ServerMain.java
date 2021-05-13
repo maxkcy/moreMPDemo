@@ -128,7 +128,6 @@ public class ServerMain extends Game {
                             for (GameRoom gameRoom : gameRoomArray) {
                                 if (gameRoom.playersList.contains(client, true)) {
 
-
                                     if (clientHash.get(client).getTeam() == ClientID.Team.BLUE){
                                         gameRoom.gameWorld.playerItemListTeamBlue.removeValue(clientHash.get(client).getClientPlayerItem(), true);
                                         BlueShirtInitPacket blueShirtInitPacket = new BlueShirtInitPacket();

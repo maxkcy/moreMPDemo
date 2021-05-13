@@ -28,6 +28,7 @@ public class PlayerEntity extends Entity{
     public BallEntity ballEntity;
     public Item worldBallItem;
     public boolean touchedBall;
+    public float kickingTimer;
 
     public CollisionFilter collisionFilter = new CollisionFilter() {
         @Override
@@ -49,7 +50,7 @@ public class PlayerEntity extends Entity{
                 return Response.touch;
 
             } else{touchedBall = false;
-                Gdx.app.log(this.toString(), "touched ball is false");}
+                Gdx.app.log(this.toString(), "touched something other than ball");}
 
 
             return Response.touch;

@@ -1,14 +1,10 @@
 package com.max.myfirstmpdemo.GameAssetsAndStuff;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
-import com.max.myfirstmpdemo.LoadingPathsAndScreen.AnimationAtlasPaths;
 import com.max.myfirstmpdemo.MyFirstMpDemoMain;
 
 public class RedPlayer {
@@ -35,6 +31,7 @@ public class RedPlayer {
         this.game = game;
 
         keyframe = new Sprite(game.splashScreen.gameAssets.textureAtlas.createSprites().get(0));
+        keyframe.setFlip(true, false);
 
         redIdleAnimation = new Animation<TextureRegion>(1/10f, game.splashScreen.gameAssets.textureAtlas.findRegions("RedIdle"));
         redRunningAnimation = new Animation<TextureRegion>(1/10f, game.splashScreen.gameAssets.textureAtlas.findRegions("RedRun"));
@@ -52,29 +49,43 @@ public class RedPlayer {
 
 
     public Vector2 position = new Vector2();
+    private Vector2 previousPosition = new Vector2();
 
     public void setPosition(float x, float y) {
         position.x = x;
         position.y = y;
     }
 
+    boolean flipX = false;
+    boolean flipY = false;
     float statetime = 0f;
     public void resetStatetime() {
         statetime = 0f;
     }
 
     public void update(float delta){
-        if(previousAnimation != animation){Gdx.app.log(this.toString(), String.valueOf(animation));}
+        if(previousAnimation != animation){Gdx.app.log(this.toString(),"new animation " + String.valueOf(animation));}
         if(animation != null){
             keyframe.setRegion(animation.getKeyFrame(statetime));
             keyframe.setPosition(position.x, position.y);
+            keyframe.setRegionWidth(24);
+            keyframe.setRegionHeight(24);
         }else {Gdx.app.log(this.toString(), "animation is null");}
         this.statetime += delta;
-        keyframe.setRegionWidth(24);
-        keyframe.setRegionHeight(24);
-        keyframe.draw(game.getBatch());
 
+        if(previousPosition != position){
+            if (previousPosition.x - position.x > 0){
+                flipX = true;
+            } else if (previousPosition.x - position.x < 0){
+                flipX = false;
+            }
+        }
+        keyframe.flip(flipX, flipY);
+        keyframe.draw(game.getBatch());
         previousAnimation = animation;
+        //previousPosition = position; this doesn't work, because it points to the same memory reference
+        previousPosition.x = position.x;
+        previousPosition.y = position.y;
     }
 
 }

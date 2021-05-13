@@ -133,6 +133,8 @@ public class ClientWS {
                     MPHomeScreen.string = ("Hello! This is The Multiplayer Home/Lobby Screen\nnumber of times played this session: " + count);
                     game.roomScreen.redPlayers.clear();
                     game.roomScreen.bluePlayers.clear();
+                    game.roomScreen.hud.setRedScore(0);
+                    game.roomScreen.hud.setBlueScore(0);
                     game.mpHomeScreen.joinGameButtom.setDisabled(false);
 
                 }

@@ -12,7 +12,9 @@ import com.max.myfirstmpdemo.Packets.BluePlayerStatePacket;
 import com.max.myfirstmpdemo.Packets.BlueShirtInitPacket;
 import com.max.myfirstmpdemo.Packets.RedPlayerStatePacket;
 import com.max.myfirstmpdemo.Packets.RedShirtInitPacket;
+import com.max.myfirstmpdemo.Packets.ScorePacket;
 import com.max.myfirstmpdemo.Packets.TouchDownPacket;
+import com.max.myfirstmpdemo.Packets.TouchUpPacket;
 import com.max.myfirstmpdemo.headless.Entities.BallEntity;
 import com.max.myfirstmpdemo.headless.Entities.Entity;
 import com.max.myfirstmpdemo.headless.Entities.PlayerEntity;
@@ -85,10 +87,10 @@ public class GameWorld {
         //^nope this is wrong... this whole page is wrong. redo it
     }
 
-    public void update() {
+    public void update(float delta) {
         asteroidStatePacketMethod();
-        redPlayerStatePacketMethod();
-        bluePlayerStatePacketMethod();
+        redPlayerStatePacketMethod(delta);
+        bluePlayerStatePacketMethod(delta);
         packetHandlingMethod();
         checkBallBoundaries();
         checkGoal();
@@ -135,7 +137,7 @@ public class GameWorld {
             }
         }
 
-    public void redPlayerStatePacketMethod(){
+    public void redPlayerStatePacketMethod(float delta){
         for (Item<Entity> playerItem : playerItemListTeamRed) {
             RedPlayerStatePacket redPlayerStatePacket = redPlayerStatePacketPool.obtain();
             redPlayerStatePacket.setClientId(ServerMain.clientHash.get(((PlayerEntity) playerItem.userData).playerSocket).playerID);
@@ -153,13 +155,12 @@ public class GameWorld {
                             Buffer.buffer(ServerMain.manualSerializer.serialize(redPlayerStatePacket)));
                     Gdx.app.log(String.valueOf(this), "RedPlayerStatePacked running sent to " + player + " " + redPlayerStatePacket.x + " " + redPlayerStatePacket.y);
                 }
-
+                ((PlayerEntity)playerItem.userData).runningStateSent = true;
                 ((PlayerEntity)playerItem.userData).idleStateSent = false;
                 ((PlayerEntity)playerItem.userData).kickingStateSent = false;
                 playerItem.userData.position.x = world.getRect(playerItem).x;
                 playerItem.userData.position.y = world.getRect(playerItem).y;
-            } else {
-                if (!((PlayerEntity) playerItem.userData).idleStateSent){
+            } else if (!((PlayerEntity) playerItem.userData).idleStateSent && ((PlayerEntity) playerItem.userData).state != PlayerEntity.States.Kicking){
                     ((PlayerEntity) playerItem.userData).state = PlayerEntity.States.Idle;
                     //send packet idleState
                     redPlayerStatePacket.setState(RedPlayerStatePacket.States.idle);
@@ -172,16 +173,49 @@ public class GameWorld {
                         Gdx.app.log(this.toString(),"redplaystatepacket idle (" + redPlayerStatePacket.getState() + ") sent w/ positions " + redPlayerStatePacket.x + " " + redPlayerStatePacket.y +"\n " +
                                 "sent to:" + player);
                     }
-                    ((PlayerEntity)playerItem.userData).idleStateSent = true;
+                ((PlayerEntity)playerItem.userData).runningStateSent = false;
+                ((PlayerEntity)playerItem.userData).idleStateSent = true;
+                ((PlayerEntity)playerItem.userData).kickingStateSent = false;
 
+
+                } else if(((PlayerEntity) playerItem.userData).state == PlayerEntity.States.Kicking && ((PlayerEntity)playerItem.userData).kickingStateSent == false){
+
+                for (ServerWebSocket player : playersList) {
+                    //send player position packet Idle
+                    player.writeFinalBinaryFrame(
+                            Buffer.buffer(ServerMain.manualSerializer.serialize(redPlayerStatePacket)));
+                    Gdx.app.log(this.toString(),"redplaystatepacket kicking (" + redPlayerStatePacket.getState() +
+                            "sent to:" + player);
+                }
+                ((PlayerEntity)playerItem.userData).kickingStateSent = true;
+
+            } else if(((PlayerEntity) playerItem.userData).state == PlayerEntity.States.Kicking && ((PlayerEntity)playerItem.userData).kickingStateSent == true){
+                ((PlayerEntity)playerItem.userData).kickingTimer += delta;
+
+                if((((BallEntity)ballItem.userData).position.y - ((PlayerEntity)playerItem.userData).position.y) <= 2 && (((BallEntity)ballItem.userData).position.x - ((PlayerEntity)playerItem.userData).position.x) <= 2) {
+                    float angle = MathUtils.atan2(((BallEntity) ballItem.userData).position.y - ((PlayerEntity) playerItem.userData).position.y,
+                            ((BallEntity) ballItem.userData).position.x - ((PlayerEntity) playerItem.userData).position.x) * MathUtils.radiansToDegrees;
+
+                    world.move(ballItem, ((BallEntity) ballItem.userData).position.x + MathUtils.cosDeg(angle) * 7f, ((BallEntity) ballItem.userData).position.y + MathUtils.cosDeg(angle) * 7f,
+                            ((BallEntity) ballItem.userData).collisionFilter);
+
+                    ((BallEntity) ballItem.userData).position.x = world.getRect(ballItem).x;
+                    ((BallEntity) ballItem.userData).position.y = world.getRect(ballItem).y;
+                }
+
+                if(((PlayerEntity)playerItem.userData).kickingTimer >= 2.0f){
+                    ((PlayerEntity)playerItem.userData).kickingTimer = 0;
+                    ((PlayerEntity) playerItem.userData).state = PlayerEntity.States.Idle;
+                    ((PlayerEntity)playerItem.userData).kickingStateSent = false;
                 }
             }
+
             redPlayerStatePacketPool.free(redPlayerStatePacket);
 
         }
     }
 
-    public void bluePlayerStatePacketMethod(){
+    public void bluePlayerStatePacketMethod(float delta){
         for (Item<Entity> playerItem : playerItemListTeamBlue) {
 
             bluePlayerStatePacket.setClientId(ServerMain.clientHash.get(((PlayerEntity) playerItem.userData).playerSocket).playerID);
@@ -204,8 +238,7 @@ public class GameWorld {
                 ((PlayerEntity)playerItem.userData).kickingStateSent = false;
                 playerItem.userData.position.x = world.getRect(playerItem).x;
                 playerItem.userData.position.y = world.getRect(playerItem).y;
-            } else {
-                if (((PlayerEntity) playerItem.userData).idleStateSent == false){
+            } else if (((PlayerEntity) playerItem.userData).idleStateSent == false){ //&& not kicking
                     ((PlayerEntity) playerItem.userData).state = PlayerEntity.States.Idle;
                     //send packet idleState
                     bluePlayerStatePacket.setState(BluePlayerStatePacket.States.idle);
@@ -221,7 +254,7 @@ public class GameWorld {
                     ((PlayerEntity)playerItem.userData).idleStateSent = true;
 
                 }
-            }
+
 
         }
     }
@@ -237,7 +270,7 @@ public class GameWorld {
                 ballItem.userData.position.x = world.getRect(ballItem).x;
                 ballItem.userData.position.y = world.getRect(ballItem).y;
 
-                ((BallEntity) ballItem.userData).state = BallEntity.States.MOVING;
+
 
                 asteroidStatePacket.setX(ballItem.userData.position.x);
                 asteroidStatePacket.setY(ballItem.userData.position.y);
@@ -245,8 +278,9 @@ public class GameWorld {
                 world.update(ballItem, ballItem.userData.position.x + (MathUtils.cosDeg(angle) * 7f), ballItem.userData.position.y + (MathUtils.sinDeg(angle) * 7f));
                 //world.update(ballItem, ballItem.userData.position.x, ballItem.userData.position.y);
             }
+            ((BallEntity) ballItem.userData).state = BallEntity.States.MOVING;
 
-                for (ServerWebSocket player : playersList) {
+            for (ServerWebSocket player : playersList) {
                     player.writeFinalBinaryFrame(Buffer.buffer(ServerMain.manualSerializer.serialize(asteroidStatePacket)));
                     Gdx.app.log(this.toString(), "asteroid position while moving sent");
                     staticSent = false;
@@ -283,47 +317,56 @@ public class GameWorld {
         for (Transferable element : workList) {
 
             if (element instanceof TouchDownPacket) {
+
                 Gdx.app.log(this.toString(), "TouchDownPacket from: " + ((TouchDownPacket) element).getServerWebSocket());
                 ClientID clientID = ServerMain.clientHash.get(((TouchDownPacket) element).getServerWebSocket());
-                float angle = MathUtils.atan2(((TouchDownPacket) element).getY() - clientID.getClientPlayerItem().userData.position.y,
-                        ((TouchDownPacket) element).getX() - clientID.getClientPlayerItem().userData.position.x)
-                        * MathUtils.radiansToDegrees;
-                angle = (((angle % 360) + 360) % 360);
 
-                float newX;
-                float newY;
-                if (((TouchDownPacket) element).getX() - clientID.getClientPlayerItem().userData.position.x < -5 ||
+                if(((PlayerEntity)clientID.getClientPlayerItem().userData).state != PlayerEntity.States.Kicking) {
+                    float angle = MathUtils.atan2(((TouchDownPacket) element).getY() - clientID.getClientPlayerItem().userData.position.y,
+                            ((TouchDownPacket) element).getX() - clientID.getClientPlayerItem().userData.position.x)
+                            * MathUtils.radiansToDegrees;
+                    angle = (((angle % 360) + 360) % 360);
+
+                    float newX;
+                    float newY;
+                    if (((TouchDownPacket) element).getX() - clientID.getClientPlayerItem().userData.position.x < -5 ||
                             ((TouchDownPacket) element).getX() - clientID.getClientPlayerItem().userData.position.x > 5) {
                         newX = clientID.getClientPlayerItem().userData.position.x + MathUtils.cosDeg(angle) * 5;
-                }else {
-                    newX = ((TouchDownPacket) element).getX();
-                }
+                    } else {
+                        newX = ((TouchDownPacket) element).getX();
+                    }
 
-                if (((TouchDownPacket) element).getY() - clientID.getClientPlayerItem().userData.position.y < -5 ||
+                    if (((TouchDownPacket) element).getY() - clientID.getClientPlayerItem().userData.position.y < -5 ||
                             ((TouchDownPacket) element).getY() - clientID.getClientPlayerItem().userData.position.y > 5) {
                         newY = clientID.getClientPlayerItem().userData.position.y + MathUtils.sinDeg(angle) * 5;
-                } else {
-                    newY = ((TouchDownPacket) element).getY();
-                }
+                    } else {
+                        newY = ((TouchDownPacket) element).getY();
+                    }
 
-                clientID.getClientGameRoom().gameWorld.world.move(clientID.getClientPlayerItem(), newX, newY,
-                        ((PlayerEntity) clientID.getClientPlayerItem().userData).collisionFilter);
+                    clientID.getClientGameRoom().gameWorld.world.move(clientID.getClientPlayerItem(), newX, newY,
+                            ((PlayerEntity) clientID.getClientPlayerItem().userData).collisionFilter);
 
-                if (((PlayerEntity) clientID.getClientPlayerItem().userData).touchedBall == true){
-                    float playerToBallAngle = MathUtils.atan2((((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity.position.y) - (clientID.getClientPlayerItem().userData.position.y),
+                    if (((PlayerEntity) clientID.getClientPlayerItem().userData).touchedBall == true) {
+                        float playerToBallAngle = MathUtils.atan2((((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity.position.y) - (clientID.getClientPlayerItem().userData.position.y),
                                 (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity.position.x) - (clientID.getClientPlayerItem().userData.position.x)) * MathUtils.radiansToDegrees;
                     /* Messi Dribble
                     float angle2 = MathUtils.atan2( (clientID.getClientPlayerItem().userData.position.y) - (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity.position.y),
                            (clientID.getClientPlayerItem().userData.position.x) - (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity.position.x)) * MathUtils.radiansToDegrees;*/
 
                         //use angle for Straight dribble
-                    playerToBallAngle = (((playerToBallAngle % 360) + 360) % 360);
+                        playerToBallAngle = (((playerToBallAngle % 360) + 360) % 360);
 
-                    (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity).world.move(((PlayerEntity) clientID.getClientPlayerItem().userData).worldBallItem,
-                            (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity).world.getRect(((PlayerEntity) clientID.getClientPlayerItem().userData).worldBallItem).x + (MathUtils.cosDeg(playerToBallAngle) * 7),
-                            (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity).world.getRect(((PlayerEntity) clientID.getClientPlayerItem().userData).worldBallItem).y + (MathUtils.sinDeg(playerToBallAngle) * 7), ((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity.collisionFilter);
+                        (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity).world.move(((PlayerEntity) clientID.getClientPlayerItem().userData).worldBallItem,
+                                (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity).world.getRect(((PlayerEntity) clientID.getClientPlayerItem().userData).worldBallItem).x + (MathUtils.cosDeg(playerToBallAngle) * 7),
+                                (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity).world.getRect(((PlayerEntity) clientID.getClientPlayerItem().userData).worldBallItem).y + (MathUtils.sinDeg(playerToBallAngle) * 7), ((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity.collisionFilter);
                         ((PlayerEntity) clientID.getClientPlayerItem().userData).touchedBall = false;
                     }
+                }
+
+                } else if(element instanceof TouchUpPacket){
+                Gdx.app.log(this.toString(), "TouchUpPacket from: " + ((TouchUpPacket) element).getServerWebSocket());
+                ClientID clientID = ServerMain.clientHash.get(((TouchUpPacket) element).getServerWebSocket());
+                ((PlayerEntity)clientID.getClientPlayerItem().userData).state = PlayerEntity.States.Kicking;
                 }
             }
             workList.clear();
@@ -394,6 +437,7 @@ public class GameWorld {
 
         int redScore = 0;
         int blueScore = 0;
+        ScorePacket scorePacket = new ScorePacket();
         public void checkGoal(){
             if(world.getRect(ballItem).x <= 10 && (world.getRect(ballItem).y < 210 && world.getRect(ballItem).y > 160)){
                 blueScore++;
@@ -402,12 +446,38 @@ public class GameWorld {
                //world.getRect(ballItem).y = ballItem.userData.position.y;
                world.update(ballItem, ballItem.userData.position.x, ballItem.userData.position.y);
                staticSent = false;
+               scorePacket.setScore(blueScore);
+               scorePacket.setTeam(ScorePacket.Team.Blue);
+               for (ServerWebSocket player : playersList){
+                   player.writeFinalBinaryFrame(Buffer.buffer(ServerMain.manualSerializer.serialize(scorePacket)));
+               }
+
+               for(Item player : playerItemListTeamRed){
+                    world.update(player, ((PlayerEntity)player.userData).startPos.x, ((PlayerEntity) player.userData).startPos.y);
+                }
+               for(Item player : playerItemListTeamBlue){
+                    world.update(player, ((PlayerEntity)player.userData).startPos.x, ((PlayerEntity) player.userData).startPos.y);
+               }
+
             }
-            if(world.getRect(ballItem).x >= 590 && (world.getRect(ballItem).y < 210 && world.getRect(ballItem).y > 160)){
+            if(world.getRect(ballItem).x >= 590 - 32 && (world.getRect(ballItem).y < 210 && world.getRect(ballItem).y > 160)){
                 redScore++;
                 ((BallEntity)ballItem.userData).resetPosition();
                 world.update(ballItem, ballItem.userData.position.x, ballItem.userData.position.y);
                 staticSent = false;
+
+                scorePacket.setScore(redScore);
+                scorePacket.setTeam(ScorePacket.Team.Red);
+                for (ServerWebSocket player : playersList){
+                    player.writeFinalBinaryFrame(Buffer.buffer(ServerMain.manualSerializer.serialize(scorePacket)));
+                }
+
+                for(Item player : playerItemListTeamRed){
+                    world.update(player, ((PlayerEntity)player.userData).startPos.x, ((PlayerEntity) player.userData).startPos.y);
+                }
+                for(Item player : playerItemListTeamBlue){
+                    world.update(player, ((PlayerEntity)player.userData).startPos.x, ((PlayerEntity) player.userData).startPos.y);
+                }
             }
         }
 

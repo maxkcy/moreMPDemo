@@ -24,20 +24,22 @@ public Stage stage;
 public  Skin skin;
 public ImageTextButton joinGameButtom;
 
+
     public MPHomeScreen(MyFirstMpDemoMain game) {
         this.game = game;
         gameAssets = new GameAssets(game);
+
     }
 
     @Override
     public void show() {
         font = gameAssets.getSgx().getFont("font");
-        stage = new Stage(new FitViewport(500,500));
+        stage = new Stage(new FitViewport(600,450));
         Gdx.input.setInputProcessor(this.stage);
         skin = gameAssets.getSgx();
 
        joinGameButtom = new ImageTextButton("Join Game!!!", skin);
-        joinGameButtom.setPosition(250 - joinGameButtom.getWidth()/2, 225);
+        joinGameButtom.setPosition(300 - joinGameButtom.getWidth()/2, 225);
         stage.addActor(joinGameButtom);
 
         ClickListener clicky = new ClickListener(){
@@ -61,6 +63,8 @@ public ImageTextButton joinGameButtom;
     public void render(float delta) {
         Gdx.gl.glClearColor(.75f, .5f, .5f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        stage.getViewport().apply();
+        game.getBatch().setProjectionMatrix(stage.getViewport().getCamera().combined);
         game.getBatch().begin();
 
         font.draw(game.getBatch(),string , 85, 75);
