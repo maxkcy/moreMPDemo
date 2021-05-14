@@ -28,7 +28,8 @@ public class PlayerEntity extends Entity{
     public BallEntity ballEntity;
     public Item worldBallItem;
     public boolean touchedBall;
-    public float kickingTimer;
+    public float kickingTimer = 0;
+    public boolean isKicking = false;
 
     public CollisionFilter collisionFilter = new CollisionFilter() {
         @Override

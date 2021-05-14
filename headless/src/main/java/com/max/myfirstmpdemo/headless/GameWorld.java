@@ -90,6 +90,7 @@ public class GameWorld {
     public void update(float delta) {
         asteroidStatePacketMethod();
         redPlayerStatePacketMethod(delta);
+        checkRedKicking(delta);
         bluePlayerStatePacketMethod(delta);
         packetHandlingMethod();
         checkBallBoundaries();
@@ -142,7 +143,7 @@ public class GameWorld {
             RedPlayerStatePacket redPlayerStatePacket = redPlayerStatePacketPool.obtain();
             redPlayerStatePacket.setClientId(ServerMain.clientHash.get(((PlayerEntity) playerItem.userData).playerSocket).playerID);
 
-            if (playerItem.userData.position.x!= world.getRect(playerItem).x || playerItem.userData.position.y != world.getRect(playerItem).y
+            if ((playerItem.userData.position.x!= world.getRect(playerItem).x || playerItem.userData.position.y != world.getRect(playerItem).y)
                     && ((PlayerEntity)playerItem.userData).state != PlayerEntity.States.Kicking){
                 ((PlayerEntity)playerItem.userData).state = PlayerEntity.States.Running;
 
@@ -160,7 +161,7 @@ public class GameWorld {
                 ((PlayerEntity)playerItem.userData).kickingStateSent = false;
                 playerItem.userData.position.x = world.getRect(playerItem).x;
                 playerItem.userData.position.y = world.getRect(playerItem).y;
-            } else if (!((PlayerEntity) playerItem.userData).idleStateSent && ((PlayerEntity) playerItem.userData).state != PlayerEntity.States.Kicking){
+            } else if (((PlayerEntity) playerItem.userData).idleStateSent == false && ((PlayerEntity) playerItem.userData).state != PlayerEntity.States.Kicking){
                     ((PlayerEntity) playerItem.userData).state = PlayerEntity.States.Idle;
                     //send packet idleState
                     redPlayerStatePacket.setState(RedPlayerStatePacket.States.idle);
@@ -178,40 +179,58 @@ public class GameWorld {
                 ((PlayerEntity)playerItem.userData).kickingStateSent = false;
 
 
-                } else if(((PlayerEntity) playerItem.userData).state == PlayerEntity.States.Kicking && ((PlayerEntity)playerItem.userData).kickingStateSent == false){
-
+            } else if(((PlayerEntity) playerItem.userData).state == PlayerEntity.States.Kicking && ((PlayerEntity)playerItem.userData).kickingStateSent == false){
+                redPlayerStatePacket.setState(RedPlayerStatePacket.States.kicking);
+                redPlayerStatePacket.setPosition(world.getRect(playerItem).x, world.getRect(playerItem).y);
                 for (ServerWebSocket player : playersList) {
-                    //send player position packet Idle
                     player.writeFinalBinaryFrame(
                             Buffer.buffer(ServerMain.manualSerializer.serialize(redPlayerStatePacket)));
-                    Gdx.app.log(this.toString(),"redplaystatepacket kicking (" + redPlayerStatePacket.getState() +
-                            "sent to:" + player);
+                    Gdx.app.log(this.toString(),"redplayerstatepacket kicking (" + redPlayerStatePacket.getState() +
+                            ") sent to:" + player);
                 }
                 ((PlayerEntity)playerItem.userData).kickingStateSent = true;
-
-            } else if(((PlayerEntity) playerItem.userData).state == PlayerEntity.States.Kicking && ((PlayerEntity)playerItem.userData).kickingStateSent == true){
-                ((PlayerEntity)playerItem.userData).kickingTimer += delta;
-
-                if((((BallEntity)ballItem.userData).position.y - ((PlayerEntity)playerItem.userData).position.y) <= 2 && (((BallEntity)ballItem.userData).position.x - ((PlayerEntity)playerItem.userData).position.x) <= 2) {
-                    float angle = MathUtils.atan2(((BallEntity) ballItem.userData).position.y - ((PlayerEntity) playerItem.userData).position.y,
-                            ((BallEntity) ballItem.userData).position.x - ((PlayerEntity) playerItem.userData).position.x) * MathUtils.radiansToDegrees;
-
-                    world.move(ballItem, ((BallEntity) ballItem.userData).position.x + MathUtils.cosDeg(angle) * 7f, ((BallEntity) ballItem.userData).position.y + MathUtils.cosDeg(angle) * 7f,
-                            ((BallEntity) ballItem.userData).collisionFilter);
-
-                    ((BallEntity) ballItem.userData).position.x = world.getRect(ballItem).x;
-                    ((BallEntity) ballItem.userData).position.y = world.getRect(ballItem).y;
-                }
-
-                if(((PlayerEntity)playerItem.userData).kickingTimer >= 2.0f){
-                    ((PlayerEntity)playerItem.userData).kickingTimer = 0;
-                    ((PlayerEntity) playerItem.userData).state = PlayerEntity.States.Idle;
-                    ((PlayerEntity)playerItem.userData).kickingStateSent = false;
-                }
+                ((PlayerEntity)playerItem.userData).idleStateSent = false;
+                ((PlayerEntity)playerItem.userData).runningStateSent = false;
+                redPlayerStatePacketPool.free(redPlayerStatePacket);
             }
 
-            redPlayerStatePacketPool.free(redPlayerStatePacket);
+        }
+    }
+    float angle = 0;
+    public void checkRedKicking(float delta){
+        for (Item<Entity> playerItem : playerItemListTeamRed) {
 
+            if ((((PlayerEntity) playerItem.userData).state == PlayerEntity.States.Kicking && ((PlayerEntity) playerItem.userData).kickingStateSent == true && ((PlayerEntity) playerItem.userData).isKicking) == false) {
+                angle = MathUtils.atan2(((BallEntity) ballItem.userData).position.y - ((PlayerEntity) playerItem.userData).position.y,
+                        ((BallEntity) ballItem.userData).position.x - ((PlayerEntity) playerItem.userData).position.x) * MathUtils.radiansToDegrees;
+
+                angle = (((angle % 360) + 360) % 360);
+
+                if (((((BallEntity) ballItem.userData).position.y - ((PlayerEntity) playerItem.userData).position.y) <= 40 && (((BallEntity) ballItem.userData).position.y - ((PlayerEntity) playerItem.userData).position.y) >= -40)
+                        && ((((BallEntity) ballItem.userData).position.x - ((PlayerEntity) playerItem.userData).position.x) <= 40 && (((BallEntity) ballItem.userData).position.x - ((PlayerEntity) playerItem.userData).position.x) >= -40)) {
+
+                    ((PlayerEntity) playerItem.userData).isKicking = true;
+                }else {
+                    ((PlayerEntity) playerItem.userData).isKicking = false;
+                    ((PlayerEntity) playerItem.userData).state = PlayerEntity.States.Idle;
+                    ((PlayerEntity) playerItem.userData).kickingStateSent = false;
+                    ((PlayerEntity) playerItem.userData).kickingTimer = 0;
+                }
+            }
+            if (((PlayerEntity) playerItem.userData).isKicking == true) {
+                world.move(ballItem, ((BallEntity) ballItem.userData).position.x + ((MathUtils.cosDeg(angle) * 10f * (2 - ((PlayerEntity) playerItem.userData).kickingTimer))),
+                        ((BallEntity) ballItem.userData).position.y + ((MathUtils.sinDeg(angle) * 10f * (2 - ((PlayerEntity) playerItem.userData).kickingTimer))),
+                        ((BallEntity) ballItem.userData).collisionFilter);
+
+                ((PlayerEntity) playerItem.userData).kickingTimer += delta;
+                if (((PlayerEntity) playerItem.userData).kickingTimer >= 2.0f) {
+                    ((PlayerEntity) playerItem.userData).isKicking = false;
+                    ((PlayerEntity) playerItem.userData).kickingTimer = 0;
+                    ((PlayerEntity) playerItem.userData).state = PlayerEntity.States.Idle;
+                    ((PlayerEntity) playerItem.userData).kickingStateSent = false;
+                }
+
+            }
         }
     }
 
@@ -238,7 +257,7 @@ public class GameWorld {
                 ((PlayerEntity)playerItem.userData).kickingStateSent = false;
                 playerItem.userData.position.x = world.getRect(playerItem).x;
                 playerItem.userData.position.y = world.getRect(playerItem).y;
-            } else if (((PlayerEntity) playerItem.userData).idleStateSent == false){ //&& not kicking
+            } else if (((PlayerEntity) playerItem.userData).idleStateSent == false && ((PlayerEntity) playerItem.userData).isKicking == false){ //&& not kicking
                     ((PlayerEntity) playerItem.userData).state = PlayerEntity.States.Idle;
                     //send packet idleState
                     bluePlayerStatePacket.setState(BluePlayerStatePacket.States.idle);
@@ -270,22 +289,23 @@ public class GameWorld {
                 ballItem.userData.position.x = world.getRect(ballItem).x;
                 ballItem.userData.position.y = world.getRect(ballItem).y;
 
-
-
                 asteroidStatePacket.setX(ballItem.userData.position.x);
                 asteroidStatePacket.setY(ballItem.userData.position.y);
             }else {
                 world.update(ballItem, ballItem.userData.position.x + (MathUtils.cosDeg(angle) * 7f), ballItem.userData.position.y + (MathUtils.sinDeg(angle) * 7f));
                 //world.update(ballItem, ballItem.userData.position.x, ballItem.userData.position.y);
+                ballItem.userData.position.x = world.getRect(ballItem).x;
+                ballItem.userData.position.y = world.getRect(ballItem).y;
+                asteroidStatePacket.setX(ballItem.userData.position.x);
+                asteroidStatePacket.setY(ballItem.userData.position.y);
             }
             ((BallEntity) ballItem.userData).state = BallEntity.States.MOVING;
 
             for (ServerWebSocket player : playersList) {
                     player.writeFinalBinaryFrame(Buffer.buffer(ServerMain.manualSerializer.serialize(asteroidStatePacket)));
-                    Gdx.app.log(this.toString(), "asteroid position while moving sent");
-                    staticSent = false;
                 }
-
+            staticSent = false;
+            Gdx.app.log(this.toString(), "asteroid position while moving sent");
         } else {
             if (((BallEntity) ballItem.userData).state == BallEntity.States.MOVING || staticSent == false) {
                 ((BallEntity) ballItem.userData).state = BallEntity.States.STATIC;
@@ -294,8 +314,8 @@ public class GameWorld {
                 asteroidStatePacket.setY(ballItem.userData.position.y);
                 for (ServerWebSocket player : playersList) {
                     player.writeFinalBinaryFrame(Buffer.buffer(ServerMain.manualSerializer.serialize(asteroidStatePacket)));
-                    Gdx.app.log(this.toString(), "asteroid position static moving sent");
                 }
+                Gdx.app.log(this.toString(), "asteroid position static moving sent");
                 staticSent = true;
             }
 

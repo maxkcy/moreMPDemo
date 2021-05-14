@@ -109,7 +109,7 @@ public class ClientWS {
         webSocketHandler.registerHandler(CountDownPacket.class, new WebSocketHandler.Handler<CountDownPacket>() {
             @Override
             public boolean handle(final WebSocket webSocket, final CountDownPacket packet) {
-                System.out.println("message from server: Countdown Packet" + "Time is: " + packet.getTime());
+                //Gdx.app.log(this.toString(), "message from server: Countdown Packet" + "Time is: " + packet.getTime());
                 if(game.getScreen() != game.roomScreen){
 
                     Gdx.app.postRunnable(()-> game.setScreen(game.roomScreen)); // really bad way of handling because you dont want to check every time, just send a different packet to switch to screen, then . but this is demo
