@@ -18,6 +18,7 @@ public class GameAssets {
     private Skin sgx;
     TextureAtlas textureAtlas;
     TextureAtlas asteroidTextureAtlas;
+    TextureAtlas asteroidNewAtlas;
 
 
     private Sprite footballPitchBackground;
@@ -32,6 +33,8 @@ public class GameAssets {
         footballPitchBackground = new Sprite((Texture) game.getAssetManager().get(SpritePaths.FOOTBALL_PITCH_BACKGROUND));
         textureAtlas = game.getAssetManager().get(AnimationAtlasPaths.PLAYERS_ATLAS, TextureAtlas.class);
         asteroidTextureAtlas = game.getAssetManager().get(AnimationAtlasPaths.ASTEROID_ATLAS, TextureAtlas.class);
+        asteroidNewAtlas = game.getAssetManager().get(AnimationAtlasPaths.ASTEROID_NEW, TextureAtlas.class);
+
     }
     public Skin getCleanCrispy() { return cleanCrispy; }
     public Skin getSgx() { return sgx; }
