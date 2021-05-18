@@ -196,6 +196,44 @@ public class GameWorld {
             }
         }
     }
+    float angleRed = 0;
+    public void checkRedKicking(float delta){
+        for (Item<Entity> playerItem : playerItemListTeamRed) {
+
+            if ((((PlayerEntity) playerItem.userData).state == PlayerEntity.States.Kicking && ((PlayerEntity) playerItem.userData).kickingStateSent == true && ((PlayerEntity) playerItem.userData).isKicking) == false) {
+                angleRed = MathUtils.atan2((((BallEntity) ballItem.userData).position.y + ballItem.userData.height/2) - (((PlayerEntity) playerItem.userData).position.y + playerItem.userData.height/2),
+                        (((BallEntity) ballItem.userData).position.x + ballItem.userData.width/2) - (((PlayerEntity) playerItem.userData).position.x + playerItem.userData.width/2)) * MathUtils.radiansToDegrees;
+
+                angleRed = (((angleRed % 360) + 360) % 360);
+
+                if ((((((BallEntity) ballItem.userData).position.y + ballItem.userData.height/2) - (((PlayerEntity) playerItem.userData).position.y + playerItem.userData.height/2)) <= 40
+                        && ((((BallEntity) ballItem.userData).position.y + ballItem.userData.height/2) - (((PlayerEntity) playerItem.userData).position.y + playerItem.userData.height/2)) >= -40)
+                        && (((((BallEntity) ballItem.userData).position.x + ballItem.userData.width/2) - (((PlayerEntity) playerItem.userData).position.x + playerItem.userData.width/2)) <= 40
+                        && ((((BallEntity) ballItem.userData).position.x + ballItem.userData.width/2) - ((PlayerEntity) playerItem.userData).position.x + playerItem.userData.width/2) >= -40)) {
+                    ((PlayerEntity) playerItem.userData).isKicking = true;
+                }else {
+                    ((PlayerEntity) playerItem.userData).isKicking = false;
+                    ((PlayerEntity) playerItem.userData).state = PlayerEntity.States.Idle;
+                    ((PlayerEntity) playerItem.userData).kickingStateSent = false;
+                }
+                ((PlayerEntity) playerItem.userData).kickingTimer = 0;
+            }
+            if (((PlayerEntity) playerItem.userData).isKicking == true) {
+                world.move(ballItem, (((BallEntity) ballItem.userData).position.x) + ((MathUtils.cosDeg(angleRed) * 10f * (2 - ((PlayerEntity) playerItem.userData).kickingTimer))),
+                        (((BallEntity) ballItem.userData).position.y) + ((MathUtils.sinDeg(angleRed) * 10f * (2 - ((PlayerEntity) playerItem.userData).kickingTimer))),
+                        ((BallEntity) ballItem.userData).collisionFilter);
+
+                ((PlayerEntity) playerItem.userData).kickingTimer += delta;
+                if (((PlayerEntity) playerItem.userData).kickingTimer >= 2.0f) {
+                    ((PlayerEntity) playerItem.userData).isKicking = false;
+                    ((PlayerEntity) playerItem.userData).kickingTimer = 0;
+                    ((PlayerEntity) playerItem.userData).state = PlayerEntity.States.Idle;
+                    ((PlayerEntity) playerItem.userData).kickingStateSent = false;
+                }
+
+            }
+        }
+    }
 
     public void bluePlayerStatePacketMethod(){
         for (Item<Entity> playerItem : playerItemListTeamBlue) {
@@ -250,45 +288,6 @@ public class GameWorld {
                 ((PlayerEntity)playerItem.userData).kickingStateSent = true;
                 ((PlayerEntity)playerItem.userData).idleStateSent = false;
                 ((PlayerEntity)playerItem.userData).runningStateSent = false;
-
-            }
-        }
-    }
-
-    float angleRed = 0;
-    public void checkRedKicking(float delta){
-        for (Item<Entity> playerItem : playerItemListTeamRed) {
-
-            if ((((PlayerEntity) playerItem.userData).state == PlayerEntity.States.Kicking && ((PlayerEntity) playerItem.userData).kickingStateSent == true && ((PlayerEntity) playerItem.userData).isKicking) == false) {
-                angleRed = MathUtils.atan2((((BallEntity) ballItem.userData).position.y + ballItem.userData.height/2) - (((PlayerEntity) playerItem.userData).position.y + playerItem.userData.height/2),
-                        (((BallEntity) ballItem.userData).position.x + ballItem.userData.width/2) - (((PlayerEntity) playerItem.userData).position.x + playerItem.userData.width/2)) * MathUtils.radiansToDegrees;
-
-                angleRed = (((angleRed % 360) + 360) % 360);
-
-                if ((((((BallEntity) ballItem.userData).position.y + ballItem.userData.height/2) - (((PlayerEntity) playerItem.userData).position.y + playerItem.userData.height/2)) <= 40
-                        && ((((BallEntity) ballItem.userData).position.y + ballItem.userData.height/2) - (((PlayerEntity) playerItem.userData).position.y + playerItem.userData.height/2)) >= -40)
-                        && (((((BallEntity) ballItem.userData).position.x + ballItem.userData.width/2) - (((PlayerEntity) playerItem.userData).position.x + playerItem.userData.width/2)) <= 40
-                        && ((((BallEntity) ballItem.userData).position.x + ballItem.userData.width/2) - ((PlayerEntity) playerItem.userData).position.x + playerItem.userData.width/2) >= -40)) {
-                    ((PlayerEntity) playerItem.userData).isKicking = true;
-                }else {
-                    ((PlayerEntity) playerItem.userData).isKicking = false;
-                    ((PlayerEntity) playerItem.userData).state = PlayerEntity.States.Idle;
-                    ((PlayerEntity) playerItem.userData).kickingStateSent = false;
-                }
-                ((PlayerEntity) playerItem.userData).kickingTimer = 0;
-            }
-            if (((PlayerEntity) playerItem.userData).isKicking == true) {
-                world.move(ballItem, (((BallEntity) ballItem.userData).position.x) + ((MathUtils.cosDeg(angleRed) * 10f * (2 - ((PlayerEntity) playerItem.userData).kickingTimer))),
-                        (((BallEntity) ballItem.userData).position.y) + ((MathUtils.sinDeg(angleRed) * 10f * (2 - ((PlayerEntity) playerItem.userData).kickingTimer))),
-                        ((BallEntity) ballItem.userData).collisionFilter);
-
-                ((PlayerEntity) playerItem.userData).kickingTimer += delta;
-                if (((PlayerEntity) playerItem.userData).kickingTimer >= 2.0f) {
-                    ((PlayerEntity) playerItem.userData).isKicking = false;
-                    ((PlayerEntity) playerItem.userData).kickingTimer = 0;
-                    ((PlayerEntity) playerItem.userData).state = PlayerEntity.States.Idle;
-                    ((PlayerEntity) playerItem.userData).kickingStateSent = false;
-                }
 
             }
         }

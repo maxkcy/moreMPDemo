@@ -44,13 +44,8 @@ public class PlayerEntity extends Entity{
 
                 //((BallEntity) other.userData).world.move(other, (((BallEntity) other.userData).position.x) + (MathUtils.cosDeg(angle) * 2),
                         //(((BallEntity) other.userData).position.y) + (MathUtils.sinDeg(angle) * 2), ((BallEntity) other.userData).collisionFilter);
-                /*if((((BallEntity) other.userData).position.y + ((BallEntity) other.userData).height/2) - (((PlayerEntity)item.userData).position.y + ((PlayerEntity) item.userData).height/2) < 5
-                        && (((BallEntity) other.userData).position.y + ((BallEntity) other.userData).height/2) - (((PlayerEntity)item.userData).position.y + ((PlayerEntity) item.userData).height/2) > -5
-                && (((BallEntity) other.userData).position.x + ((BallEntity) other.userData).width/2) - (((PlayerEntity)item.userData).position.x + ((PlayerEntity) item.userData).width/2) < 5
-                        && (((BallEntity) other.userData).position.x + ((BallEntity) other.userData).width/2) - (((PlayerEntity)item.userData).position.x + ((PlayerEntity) item.userData).width /2) > -5){
-                */
                 touchedBall = true;
-                Gdx.app.log(this.toString(), "touched ball is TRUE");//}
+                Gdx.app.log(this.toString(), "touched ball is TRUE");
                 //((BallEntity)other.userData).position.x = ((BallEntity)other.userData).world.getRect(other).x;
                 //((BallEntity)other.userData).position.y = ((BallEntity)other.userData).world.getRect(other).y;
                 return Response.touch;
