@@ -89,9 +89,10 @@ public class GameWorld {
 
     public void update(float delta) {
         asteroidStatePacketMethod();
-        redPlayerStatePacketMethod(delta);
+        redPlayerStatePacketMethod();
         checkRedKicking(delta);
-        bluePlayerStatePacketMethod(delta);
+        bluePlayerStatePacketMethod();
+        checkBlueKicking(delta);
         packetHandlingMethod();
         checkBallBoundaries();
         checkGoal();
@@ -138,7 +139,7 @@ public class GameWorld {
             }
         }
 
-    public void redPlayerStatePacketMethod(float delta){
+    public void redPlayerStatePacketMethod(){
         for (Item<Entity> playerItem : playerItemListTeamRed) {
             RedPlayerStatePacket redPlayerStatePacket = redPlayerStatePacketPool.obtain();
             redPlayerStatePacket.setClientId(ServerMain.clientHash.get(((PlayerEntity) playerItem.userData).playerSocket).playerID);
@@ -193,33 +194,33 @@ public class GameWorld {
                 ((PlayerEntity)playerItem.userData).runningStateSent = false;
                 redPlayerStatePacketPool.free(redPlayerStatePacket);
             }
-
         }
     }
-    float angle = 0;
+    float angleRed = 0;
     public void checkRedKicking(float delta){
         for (Item<Entity> playerItem : playerItemListTeamRed) {
 
             if ((((PlayerEntity) playerItem.userData).state == PlayerEntity.States.Kicking && ((PlayerEntity) playerItem.userData).kickingStateSent == true && ((PlayerEntity) playerItem.userData).isKicking) == false) {
-                angle = MathUtils.atan2(((BallEntity) ballItem.userData).position.y - ((PlayerEntity) playerItem.userData).position.y,
-                        ((BallEntity) ballItem.userData).position.x - ((PlayerEntity) playerItem.userData).position.x) * MathUtils.radiansToDegrees;
+                angleRed = MathUtils.atan2((((BallEntity) ballItem.userData).position.y + ballItem.userData.height/2) - (((PlayerEntity) playerItem.userData).position.y + playerItem.userData.height/2),
+                        (((BallEntity) ballItem.userData).position.x + ballItem.userData.width/2) - (((PlayerEntity) playerItem.userData).position.x + playerItem.userData.width/2)) * MathUtils.radiansToDegrees;
 
-                angle = (((angle % 360) + 360) % 360);
+                angleRed = (((angleRed % 360) + 360) % 360);
 
-                if (((((BallEntity) ballItem.userData).position.y - ((PlayerEntity) playerItem.userData).position.y) <= 40 && (((BallEntity) ballItem.userData).position.y - ((PlayerEntity) playerItem.userData).position.y) >= -40)
-                        && ((((BallEntity) ballItem.userData).position.x - ((PlayerEntity) playerItem.userData).position.x) <= 40 && (((BallEntity) ballItem.userData).position.x - ((PlayerEntity) playerItem.userData).position.x) >= -40)) {
-
+                if ((((((BallEntity) ballItem.userData).position.y + ballItem.userData.height/2) - (((PlayerEntity) playerItem.userData).position.y + playerItem.userData.height/2)) <= 40
+                        && ((((BallEntity) ballItem.userData).position.y + ballItem.userData.height/2) - (((PlayerEntity) playerItem.userData).position.y + playerItem.userData.height/2)) >= -40)
+                        && (((((BallEntity) ballItem.userData).position.x + ballItem.userData.width/2) - (((PlayerEntity) playerItem.userData).position.x + playerItem.userData.width/2)) <= 40
+                        && ((((BallEntity) ballItem.userData).position.x + ballItem.userData.width/2) - ((PlayerEntity) playerItem.userData).position.x + playerItem.userData.width/2) >= -40)) {
                     ((PlayerEntity) playerItem.userData).isKicking = true;
                 }else {
                     ((PlayerEntity) playerItem.userData).isKicking = false;
                     ((PlayerEntity) playerItem.userData).state = PlayerEntity.States.Idle;
                     ((PlayerEntity) playerItem.userData).kickingStateSent = false;
-                    ((PlayerEntity) playerItem.userData).kickingTimer = 0;
                 }
+                ((PlayerEntity) playerItem.userData).kickingTimer = 0;
             }
             if (((PlayerEntity) playerItem.userData).isKicking == true) {
-                world.move(ballItem, ((BallEntity) ballItem.userData).position.x + ((MathUtils.cosDeg(angle) * 10f * (2 - ((PlayerEntity) playerItem.userData).kickingTimer))),
-                        ((BallEntity) ballItem.userData).position.y + ((MathUtils.sinDeg(angle) * 10f * (2 - ((PlayerEntity) playerItem.userData).kickingTimer))),
+                world.move(ballItem, (((BallEntity) ballItem.userData).position.x) + ((MathUtils.cosDeg(angleRed) * 10f * (2 - ((PlayerEntity) playerItem.userData).kickingTimer))),
+                        (((BallEntity) ballItem.userData).position.y) + ((MathUtils.sinDeg(angleRed) * 10f * (2 - ((PlayerEntity) playerItem.userData).kickingTimer))),
                         ((BallEntity) ballItem.userData).collisionFilter);
 
                 ((PlayerEntity) playerItem.userData).kickingTimer += delta;
@@ -234,12 +235,12 @@ public class GameWorld {
         }
     }
 
-    public void bluePlayerStatePacketMethod(float delta){
+    public void bluePlayerStatePacketMethod(){
         for (Item<Entity> playerItem : playerItemListTeamBlue) {
-
+            bluePlayerStatePacket = new BluePlayerStatePacket();
             bluePlayerStatePacket.setClientId(ServerMain.clientHash.get(((PlayerEntity) playerItem.userData).playerSocket).playerID);
 
-            if (playerItem.userData.position.x!= world.getRect(playerItem).x || playerItem.userData.position.y != world.getRect(playerItem).y
+            if ((playerItem.userData.position.x!= world.getRect(playerItem).x || playerItem.userData.position.y != world.getRect(playerItem).y)
                     && ((PlayerEntity)playerItem.userData).state != PlayerEntity.States.Kicking){
                 ((PlayerEntity)playerItem.userData).state = PlayerEntity.States.Running;
 
@@ -252,47 +253,103 @@ public class GameWorld {
                             Buffer.buffer(ServerMain.manualSerializer.serialize(bluePlayerStatePacket)));
                     Gdx.app.log(String.valueOf(this), "BluePlayerStatePacked running sent to " + player + " " + bluePlayerStatePacket.x + " " + bluePlayerStatePacket.y);
                 }
-
+                ((PlayerEntity)playerItem.userData).runningStateSent = true;
                 ((PlayerEntity)playerItem.userData).idleStateSent = false;
                 ((PlayerEntity)playerItem.userData).kickingStateSent = false;
                 playerItem.userData.position.x = world.getRect(playerItem).x;
                 playerItem.userData.position.y = world.getRect(playerItem).y;
-            } else if (((PlayerEntity) playerItem.userData).idleStateSent == false && ((PlayerEntity) playerItem.userData).isKicking == false){ //&& not kicking
-                    ((PlayerEntity) playerItem.userData).state = PlayerEntity.States.Idle;
-                    //send packet idleState
-                    bluePlayerStatePacket.setState(BluePlayerStatePacket.States.idle);
-                    bluePlayerStatePacket.setPosition(world.getRect(playerItem).x, world.getRect(playerItem).y);
+            } else if (((PlayerEntity) playerItem.userData).idleStateSent == false && ((PlayerEntity) playerItem.userData).state != PlayerEntity.States.Kicking){
+                ((PlayerEntity) playerItem.userData).state = PlayerEntity.States.Idle;
+                //send packet idleState
+                bluePlayerStatePacket.setState(BluePlayerStatePacket.States.idle);
+                bluePlayerStatePacket.setPosition(world.getRect(playerItem).x, world.getRect(playerItem).y);
 
-                    for (ServerWebSocket player : playersList) {
-                        //send player position packet Idle
-                        player.writeFinalBinaryFrame(
-                                Buffer.buffer(ServerMain.manualSerializer.serialize(bluePlayerStatePacket)));
-                        Gdx.app.log(this.toString(),"bluePlayerStatePacket idle (" + bluePlayerStatePacket.getState() + ") sent w/ positions " + bluePlayerStatePacket.x + " " + bluePlayerStatePacket.y +"\n " +
-                                "sent to:" + player);
-                    }
-                    ((PlayerEntity)playerItem.userData).idleStateSent = true;
-
+                for (ServerWebSocket player : playersList) {
+                    //send player position packet Idle
+                    player.writeFinalBinaryFrame(
+                            Buffer.buffer(ServerMain.manualSerializer.serialize(bluePlayerStatePacket)));
+                    Gdx.app.log(this.toString(),"redplaystatepacket idle (" + bluePlayerStatePacket.getState() + ") sent w/ positions " + bluePlayerStatePacket.x + " " + bluePlayerStatePacket.y +"\n " +
+                            "sent to:" + player);
                 }
+                ((PlayerEntity)playerItem.userData).runningStateSent = false;
+                ((PlayerEntity)playerItem.userData).idleStateSent = true;
+                ((PlayerEntity)playerItem.userData).kickingStateSent = false;
 
 
+            } else if(((PlayerEntity) playerItem.userData).state == PlayerEntity.States.Kicking && ((PlayerEntity)playerItem.userData).kickingStateSent == false){
+                bluePlayerStatePacket.setState(BluePlayerStatePacket.States.kicking);
+                bluePlayerStatePacket.setPosition(world.getRect(playerItem).x, world.getRect(playerItem).y);
+                for (ServerWebSocket player : playersList) {
+                    player.writeFinalBinaryFrame(
+                            Buffer.buffer(ServerMain.manualSerializer.serialize(bluePlayerStatePacket)));
+                    Gdx.app.log(this.toString(),"bluePlayerStatePacket kicking (" + bluePlayerStatePacket.getState() +
+                            ") sent to:" + player);
+                }
+                ((PlayerEntity)playerItem.userData).kickingStateSent = true;
+                ((PlayerEntity)playerItem.userData).idleStateSent = false;
+                ((PlayerEntity)playerItem.userData).runningStateSent = false;
+
+            }
         }
     }
+    float angleBlue = 0;
+    public void checkBlueKicking(float delta){
+        for (Item<Entity> playerItem : playerItemListTeamBlue) {
+
+            if ((((PlayerEntity) playerItem.userData).state == PlayerEntity.States.Kicking && ((PlayerEntity) playerItem.userData).kickingStateSent == true && ((PlayerEntity) playerItem.userData).isKicking) == false) {
+                angleBlue = MathUtils.atan2((((BallEntity) ballItem.userData).position.y + ballItem.userData.height/2) - (((PlayerEntity) playerItem.userData).position.y + playerItem.userData.height/2),
+                        (((BallEntity) ballItem.userData).position.x + ballItem.userData.width/2) - (((PlayerEntity) playerItem.userData).position.x + playerItem.userData.width/2)) * MathUtils.radiansToDegrees;
+
+                angleBlue = (((angleBlue % 360) + 360) % 360);
+
+                if ((((((BallEntity) ballItem.userData).position.y + ballItem.userData.height/2) - (((PlayerEntity) playerItem.userData).position.y + playerItem.userData.height/2)) <= 40
+                        && ((((BallEntity) ballItem.userData).position.y + ballItem.userData.height/2) - (((PlayerEntity) playerItem.userData).position.y + playerItem.userData.height/2)) >= -40)
+                        && (((((BallEntity) ballItem.userData).position.x + ballItem.userData.width/2) - (((PlayerEntity) playerItem.userData).position.x + playerItem.userData.width/2)) <= 40
+                        && ((((BallEntity) ballItem.userData).position.x + ballItem.userData.width/2) - ((PlayerEntity) playerItem.userData).position.x + playerItem.userData.width/2) >= -40)) {
+                    ((PlayerEntity) playerItem.userData).isKicking = true;
+                }else {
+                    ((PlayerEntity) playerItem.userData).isKicking = false;
+                    ((PlayerEntity) playerItem.userData).state = PlayerEntity.States.Idle;
+                    ((PlayerEntity) playerItem.userData).kickingStateSent = false;
+                }
+                ((PlayerEntity) playerItem.userData).kickingTimer = 0;
+            }
+            if (((PlayerEntity) playerItem.userData).isKicking == true) {
+                world.move(ballItem, (((BallEntity) ballItem.userData).position.x) + ((MathUtils.cosDeg(angleBlue) * 10f * (2 - ((PlayerEntity) playerItem.userData).kickingTimer))),
+                        (((BallEntity) ballItem.userData).position.y) + ((MathUtils.sinDeg(angleBlue) * 10f * (2 - ((PlayerEntity) playerItem.userData).kickingTimer))),
+                        ((BallEntity) ballItem.userData).collisionFilter);
+
+                ((PlayerEntity) playerItem.userData).kickingTimer += delta;
+                if (((PlayerEntity) playerItem.userData).kickingTimer >= 2.0f) {
+                    ((PlayerEntity) playerItem.userData).isKicking = false;
+                    ((PlayerEntity) playerItem.userData).kickingTimer = 0;
+                    ((PlayerEntity) playerItem.userData).state = PlayerEntity.States.Idle;
+                    ((PlayerEntity) playerItem.userData).kickingStateSent = false;
+                }
+
+            }
+        }
+    }
+
+
     boolean staticSent = false;
     public void asteroidStatePacketMethod(){
         if (ballItem.userData.position.x != world.getRect(ballItem).x || ballItem.userData.position.y != world.getRect(ballItem).y) {
             float angle;
-            angle = MathUtils.atan2(world.getRect(ballItem).y - ballItem.userData.position.y, world.getRect(ballItem).x - ballItem.userData.position.x)
+            angle = MathUtils.atan2((world.getRect(ballItem).y + ballItem.userData.height/2 ) - (ballItem.userData.position.y + ballItem.userData.height/2),
+                    (world.getRect(ballItem).x + ballItem.userData.width/2) - (ballItem.userData.position.x + ballItem.userData.width/2))
                     * MathUtils.radiansToDegrees;
             angle = (((angle % 360) + 360) % 360);
 
-            if(world.getRect(ballItem).x - ballItem.userData.position.x <= 7 && world.getRect(ballItem).y - ballItem.userData.position.y <= 7 ) {
+            if((world.getRect(ballItem).x + ballItem.userData.width/2) - (ballItem.userData.position.x + ballItem.userData.width/2) <= 7
+                    && (world.getRect(ballItem).y + ballItem.userData.height/2) - (ballItem.userData.position.y + ballItem.userData.height/2) <= 7 ) {
                 ballItem.userData.position.x = world.getRect(ballItem).x;
                 ballItem.userData.position.y = world.getRect(ballItem).y;
 
                 asteroidStatePacket.setX(ballItem.userData.position.x);
                 asteroidStatePacket.setY(ballItem.userData.position.y);
             }else {
-                world.update(ballItem, ballItem.userData.position.x + (MathUtils.cosDeg(angle) * 7f), ballItem.userData.position.y + (MathUtils.sinDeg(angle) * 7f));
+                world.update(ballItem, (ballItem.userData.position.x) + (MathUtils.cosDeg(angle) * 7f), (ballItem.userData.position.y) + (MathUtils.sinDeg(angle) * 7f));
                 //world.update(ballItem, ballItem.userData.position.x, ballItem.userData.position.y);
                 ballItem.userData.position.x = world.getRect(ballItem).x;
                 ballItem.userData.position.y = world.getRect(ballItem).y;
@@ -342,7 +399,7 @@ public class GameWorld {
                 ClientID clientID = ServerMain.clientHash.get(((TouchDownPacket) element).getServerWebSocket());
 
                 if(((PlayerEntity)clientID.getClientPlayerItem().userData).state != PlayerEntity.States.Kicking) {
-                    float angle = MathUtils.atan2(((TouchDownPacket) element).getY() - clientID.getClientPlayerItem().userData.position.y,
+                    float angle = MathUtils.atan2(((TouchDownPacket) element).getY()  - clientID.getClientPlayerItem().userData.position.y,
                             ((TouchDownPacket) element).getX() - clientID.getClientPlayerItem().userData.position.x)
                             * MathUtils.radiansToDegrees;
                     angle = (((angle % 360) + 360) % 360);
@@ -367,8 +424,10 @@ public class GameWorld {
                             ((PlayerEntity) clientID.getClientPlayerItem().userData).collisionFilter);
 
                     if (((PlayerEntity) clientID.getClientPlayerItem().userData).touchedBall == true) {
-                        float playerToBallAngle = MathUtils.atan2((((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity.position.y) - (clientID.getClientPlayerItem().userData.position.y),
-                                (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity.position.x) - (clientID.getClientPlayerItem().userData.position.x)) * MathUtils.radiansToDegrees;
+                        float playerToBallAngle = MathUtils.atan2((((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity.position.y + ((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity.height/2)
+                                        - (clientID.getClientPlayerItem().userData.position.y + clientID.getClientPlayerItem().userData.height/2),
+                                ((((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity.position.x + ((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity.width/2))
+                                        - (clientID.getClientPlayerItem().userData.position.x + clientID.getClientPlayerItem().userData.width/2)) * MathUtils.radiansToDegrees;
                     /* Messi Dribble
                     float angle2 = MathUtils.atan2( (clientID.getClientPlayerItem().userData.position.y) - (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity.position.y),
                            (clientID.getClientPlayerItem().userData.position.x) - (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity.position.x)) * MathUtils.radiansToDegrees;*/
@@ -377,8 +436,9 @@ public class GameWorld {
                         playerToBallAngle = (((playerToBallAngle % 360) + 360) % 360);
 
                         (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity).world.move(((PlayerEntity) clientID.getClientPlayerItem().userData).worldBallItem,
-                                (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity).world.getRect(((PlayerEntity) clientID.getClientPlayerItem().userData).worldBallItem).x + (MathUtils.cosDeg(playerToBallAngle) * 7),
-                                (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity).world.getRect(((PlayerEntity) clientID.getClientPlayerItem().userData).worldBallItem).y + (MathUtils.sinDeg(playerToBallAngle) * 7), ((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity.collisionFilter);
+                                (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity).world.getRect(((PlayerEntity) clientID.getClientPlayerItem().userData).worldBallItem).x + (MathUtils.cosDeg(playerToBallAngle)*7),
+                                (((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity).world.getRect(((PlayerEntity) clientID.getClientPlayerItem().userData).worldBallItem).y + (MathUtils.sinDeg(playerToBallAngle)*7),
+                                ((PlayerEntity) clientID.getClientPlayerItem().userData).ballEntity.collisionFilter);
                         ((PlayerEntity) clientID.getClientPlayerItem().userData).touchedBall = false;
                     }
                 }
@@ -474,9 +534,17 @@ public class GameWorld {
 
                for(Item player : playerItemListTeamRed){
                     world.update(player, ((PlayerEntity)player.userData).startPos.x, ((PlayerEntity) player.userData).startPos.y);
+                   ((PlayerEntity) player.userData).state = PlayerEntity.States.Idle;
+
+                   //((PlayerEntity) player.userData).kickingStateSent = false;
+                   //((PlayerEntity) player.userData).kickingTimer = 0;
                 }
                for(Item player : playerItemListTeamBlue){
                     world.update(player, ((PlayerEntity)player.userData).startPos.x, ((PlayerEntity) player.userData).startPos.y);
+                    ((PlayerEntity) player.userData).state = PlayerEntity.States.Idle;
+
+                   //((PlayerEntity) player.userData).kickingStateSent = false;
+                   //((PlayerEntity) player.userData).kickingTimer = 0;
                }
 
             }
@@ -494,9 +562,18 @@ public class GameWorld {
 
                 for(Item player : playerItemListTeamRed){
                     world.update(player, ((PlayerEntity)player.userData).startPos.x, ((PlayerEntity) player.userData).startPos.y);
+                    ((PlayerEntity) player.userData).state = PlayerEntity.States.Idle;
+
+                    //((PlayerEntity) player.userData).kickingStateSent = false;
+                    //((PlayerEntity) player.userData).kickingTimer = 0;
                 }
                 for(Item player : playerItemListTeamBlue){
                     world.update(player, ((PlayerEntity)player.userData).startPos.x, ((PlayerEntity) player.userData).startPos.y);
+                    ((PlayerEntity) player.userData).state = PlayerEntity.States.Idle;
+
+                    //((PlayerEntity) player.userData).kickingStateSent = false;
+                    //((PlayerEntity) player.userData).kickingTimer = 0;
+
                 }
             }
         }

@@ -38,7 +38,7 @@ public class ClientWS {
         System.out.println(wss);
         //webSocket = WebSockets.newSocket(wss + "myws"); //switch servers bt selecting a websocket and commenting out the other
 
-        webSocket = WebSockets.newSocket(WebSockets.toWebSocketUrl("localhost", 8778));
+        webSocket = WebSockets.newSocket(WebSockets.toWebSocketUrl("localhost", Tools.PORT));
 
         System.out.println(webSocket.isSecure());
         //inorder for the initialization error to go away call

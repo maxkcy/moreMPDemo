@@ -25,6 +25,7 @@ public class LoadingPaths {
         List<String> list = new ArrayList<>();
         list.add(AnimationAtlasPaths.PLAYERS_ATLAS);
         list.add(AnimationAtlasPaths.ASTEROID_ATLAS);
+        list.add(AnimationAtlasPaths.ASTEROID_NEW);
         return list;
     }
 }
