@@ -35,7 +35,9 @@ public class BallEntity extends Entity{
    public CollisionFilter collisionFilter = new CollisionFilter() {
         @Override
         public Response filter(Item item, Item other) {
-            if(other.userData instanceof Entity);
+            if(other.userData instanceof Entity){
+                return Response.bounce;
+            }
             return Response.bounce;
         }
     };
